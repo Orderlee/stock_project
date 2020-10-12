@@ -4,10 +4,12 @@ from bs4 import BeautifulSoup
 #from flask import Blueprint, render_template,request
 
 plusUrl = input('company:')
-
+soup = BeautifulSoup(response.text, 'lxml')
+plusUrl =soup.find_all()
 #https://finance.yahoo.com/quote/AAPL?p=AAPL&.tsrc=fin-srch
 
 #https://finance.yahoo.com/quote/TSLA?p=TSLA&.tsrc=fin-srch
+<h1 class="D(ib) Fz(18px)" data-reactid="7">Tesla, Inc. (TSLA)</h1>
 
 def priceTracker():
     url ='https://finance.yahoo.com/quote/'+str(plusUrl)+'?p='+str(plusUrl)+'&.tsrc=fin-srch'
