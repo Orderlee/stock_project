@@ -5,11 +5,10 @@ from fastapi import APIRouter
 from com_stock_api.korea_covid.korea_covid_dao import koreaDao
 from com_stock_api.korea_covid.korea_covid_dto import KoreaDto
 
-class KoreaApi(Resource):
+class KoreaApi(object):
 
     def __init__(self):
-        self.dao = koreaDao
+        self.router = APIRouter()
 
-    def get(self):
-        covid = self.dao.select_covid()
-        return jsonify(covid[0])
+    def get_router(self):
+        return self.router

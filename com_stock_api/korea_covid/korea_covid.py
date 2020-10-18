@@ -1,7 +1,7 @@
 from com_stock_api.ext.db import Base
 from sqlalchemy import Column,Integer, String, ForeignKey, create_engine, DATE
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.dialects.mysql import DECIMAL, VARCHAR, LONGTEXT
+from sqlalchemy.dialects.mysql import VARCHAR
 
 class KoreaCovid(Base):
     __tablename__ = 'korea_covid'

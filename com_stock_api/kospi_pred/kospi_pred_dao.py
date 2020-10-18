@@ -1,33 +1,37 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from com_stock_api.ext.db import Base
+from com_stock_api.korea_covid.korea_covid_dto import KospiPred
+
 import mysql.connector
 from com_stock_api.ext.db import config
 
-class KospiDao:
-
+class KospiDao():
+    
     def __init__(self):
-        self.connector = mysql.connector.cursor(dictionary=True)
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+        self.engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stockdb?charset=utf8', encoding='utf8', echo=True)
 
-    def select_kospi(self):
-        cur = self.cursor
-        con = self.connector
-        rows = []
+        self.connector = mysql.connector(**config)
+        self.cursor = self.connector.cursor(dictionary = True)
 
-        try:
-            cur.execute('select * from kospi_pred',)
-            rows = cur.fetchall()
-            for row in rows:
-                print(f'price is : {str(row["price"])}')
+    def create_table(self):
+        Base.metadate.create_all(self.engine)
 
-            cur.close()
+    def insert_kospi_pred(self):
+        session = self.session
+        session.add(KospiPred(kospi_id='1',date='2020-02-01',stock='lg화학',price='222'))
+        session.commit()
 
-        except:
-            print('Exception ...')
+    def fetch_kospi_pred(self):
+        session =self.session
+        query = session.query(KospiPred)
 
-        finally:
-            if con is not None:
-                con.close()
+    def update_kospi_pred(self,db:Session, kospi_pred):
+        ...
 
-        return rows
-
-print('----2-----')
-dao = KospiDao()
-dao.select_kospi()
+    def delete_kospi_pred(self, db:Session, kospi_pred):
+        result = db.query(KospiPred)
+        db.delete(result)
+        db.commit()

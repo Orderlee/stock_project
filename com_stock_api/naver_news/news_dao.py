@@ -1,33 +1,41 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from com_stock_api.ext.db import Base
+from com_stock_api.naver_news.news_dto import News
+
+
+
 import mysql.connector
 from com_stock_api.ext.db import config
 
-class NewsDao:
+
+
+class NewsDao():
 
     def __init__(self):
-        self.connector = mysql.connector.connect(**config)
-        self.cursor = self.connector.cursor(dictionary=True)
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+        self.engine = create_engine('mysql+mysqlconnector://root:root@127.0.0.1/stockdb?charset=utf8', encoding='utf8', echo=True)
 
-    def select_news(self):
-        cur = self.cursor
-        con = self.connector
-        rows = []
+        self.connector = mysql.connector(**config)
+        self.cursor = self.connector.cursor(dictionary = True)
 
-        try:
-            cur.execute('select * from naver_news',)
-            rows = cur.fetchall()
-            for row in rows:
-                print(f'headline is : {str(row["headline"])}')
+    def create_table(self):
+        Base.metadate.create_all(self.engine)
 
-            cur.close()
+    def insert_naver_news(self):
+        session = self.session
+        session.add(News(news_id='2',date='2020-02-02',symbol='lg화학',headline='dkdif',url='hhtpt;//dkdn'))
+        session.commit()
 
-        except:
-            print('Exception ...')
+    def fetch_naver_news(self):
+        session = self.session
+        query = session.query(News)
 
-        finally:
-            if con is not None:
-                con.close()
-        return rows
+    def update_naver_news(self,db:Session, naver_news):
+        ...
 
-print('----2----')
-dao = NewsDao()
-dao.select_news()
+    def delete_naver_news(self, db:Session,naver_news):
+        result = db.query(News)
+        db.delete(result)
+        db.commit()

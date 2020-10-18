@@ -1,12 +1,12 @@
-from flask_restful import Resource
-from flask import Response, jsonify
+from typing import List
+from fastapi import APIRouter
 from com_stock_api.naver_finance.stock_dao import StockDao
+from com_stock_api.naver_finance.stock_dto import StockDto
 
-class StocksApi(Resource):
+class StocksApi(object):
     
     def __init__(self):
-        self.dao = StockDao
+        self.router = APIRouter()
 
-    def get(self):
-        stocks = self.dao.select_stocks()
-        return jsonify(stocks[0])
+    def get_router(self):
+        return self.router
