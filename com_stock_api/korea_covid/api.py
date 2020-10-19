@@ -1,5 +1,4 @@
 from flask_restful import Resource, reqparse
-
 from com_stock_api.korea_covid.dao import KoreaDao
 from com_stock_api.korea_covid.dto import KoreaDto
 

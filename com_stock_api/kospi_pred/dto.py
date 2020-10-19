@@ -1,7 +1,7 @@
 from com_stock_api.ext.db import db 
-from com_stock_api.korea_covid.dto import KoreaDto
-from com_stock_api.naver_finance.dto import StockDto
-from com_stock_api.naver_news.dto import NewsDto
+# from com_stock_api.korea_covid.dto import KoreaDto
+# from com_stock_api.naver_finance.dto import StockDto
+# from com_stock_api.naver_news.dto import NewsDto
 
 class KospiDto(db.Model):
     __tablename__ = 'kospi_pred'

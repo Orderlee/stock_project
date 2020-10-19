@@ -1,6 +1,6 @@
 from com_stock_api.ext.db import db
 
-class NewsDao():
+class StockDao():
 
     @classmethod
     def find_all(cls):

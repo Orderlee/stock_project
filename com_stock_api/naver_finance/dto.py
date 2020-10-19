@@ -1,6 +1,6 @@
 from com_stock_api.ext.db import db 
+# from com_stock_api.kospi_pred.dto import KospiDto
 # from com_stock_api.korea_covid.dto import KoreaDto
-# from com_stock_api.naver_finance.dto import StockDto
 # from com_stock_api.naver_news.dto import NewsDto
 
 class StockDto(db.Model):
