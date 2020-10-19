@@ -7,31 +7,29 @@ class NewsDto(db.Model):
     __tablename__ = 'naver_news'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    news_id : int = db.Column(db.String(30), primary_key = True, index=True)
+    news_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
     date : date = db.Column(db.DATE)
-    symbol :str = db.Column(db.VARCHAR(30))
-    headline :str = db.Column(db.VARCHAR(30))
-    url: str = db.Column(db.VARCHAR(30))
+    sentiment_analysis :str = db.Column(db.VARCHAR(30))
+    keywords :str = db.Column(db.VARCHAR(30))
     
-    def __init__(self, news_id, date, symbol, headline, url):
+    def __init__(self, news_id, date, sentiment_analysis, keywords):
         self.news_id = news_id
         self.date = date
-        self.symbol = symbol
-        self.headline = headline
-        self.url = url
+        self.sentiment_analysis = sentiment_analysis
+        self.keywords = keywords
+        
     
     def __repr__(self):
-        return f'news_id={self.news_id}, date={self.date}, symbol={self.symbol},\
-            headline={self.headline},url={self.url}'
+        return f'news_id={self.news_id}, date={self.date}, sentiment_analysis={self.sentiment_analysis},\
+            keywords={self.keywords}'
             
     @property
     def json(self):
         return {
             'news_id': self.news_id,
             'date': self.date,
-            'symbol' : self.symbol,
-            'headline' : self.headline,
-            'url' : self.url
+            'sentiment_analysis' : self.sentiment_analysis,
+            'keywords' : self.keywords
         }
 
     def save(self):

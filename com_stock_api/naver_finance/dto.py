@@ -7,7 +7,7 @@ class StockDto(db.Model):
     __tablename__ = 'naver_finance'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    stock_id : int = db.Column(db.String(30), primary_key = True, index=True)
+    stock_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
     date : date = db.Column(db.DATE)
     open : int = db.Column(db.VARCHAR(30))
     close : int = db.Column(db.VARCHAR(30))

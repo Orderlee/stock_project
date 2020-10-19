@@ -7,7 +7,7 @@ class KoreaDto(db.Model):
     __tablename__ = 'korea_covid'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    covid_id : int = db.Column(db.String(30), primary_key = True, index=True)
+    covid_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
     date : date = db.Column(db.DATE)
     seoul_cases :int = db.Column(db.VARCHAR(30))
     seoul_death :int = db.Column(db.VARCHAR(30))

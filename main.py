@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 print('========= url ===========')
 print(url)
-app.config['SQLALCHEMY_DATABASE_URL'] =url
+app.config['SQLALCHEMY_DATABASE_URI'] =url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 api= Api(app)
