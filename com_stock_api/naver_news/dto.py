@@ -17,7 +17,7 @@ class NewsDto(db.Model):
     url :str = db.Column(db.VARCHAR(30))
 
     
-    def __init__(self,id,date, headline, neg, pos, neu, keywords,url):
+    def __init__(self, id, date, headline, neg, pos, neu, keywords,url):
         self.id = id
         self.date = date
         self.headline = headline
