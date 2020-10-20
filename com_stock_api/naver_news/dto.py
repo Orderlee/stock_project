@@ -7,27 +7,24 @@ class NewsDto(db.Model):
     __tablename__ = 'naver_news'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    news_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
-    date : date = db.Column(db.DATE)
+    news_date : int = db.Column(db.DATETIME, primary_key = True, index=True)
     sentiment_analysis :str = db.Column(db.VARCHAR(30))
     keywords :str = db.Column(db.VARCHAR(30))
     
-    def __init__(self, news_id, date, sentiment_analysis, keywords):
-        self.news_id = news_id
-        self.date = date
+    def __init__(self,news_date, sentiment_analysis, keywords):
+        self.news_date = news_date
         self.sentiment_analysis = sentiment_analysis
         self.keywords = keywords
         
     
     def __repr__(self):
-        return f'news_id={self.news_id}, date={self.date}, sentiment_analysis={self.sentiment_analysis},\
+        return f'news_date={self.news_date}, sentiment_analysis={self.sentiment_analysis},\
             keywords={self.keywords}'
             
     @property
     def json(self):
         return {
-            'news_id': self.news_id,
-            'date': self.date,
+            'news_date': self.news_date,
             'sentiment_analysis' : self.sentiment_analysis,
             'keywords' : self.keywords
         }

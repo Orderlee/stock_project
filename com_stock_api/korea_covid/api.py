@@ -6,8 +6,7 @@ class KoreaCovid(Resource):
 
     def __init__(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('covid_id', type=int, required=False, help='This field cannot be left blank')
-        parser.add_argument('date', type=int, required=False, help='This field cannot be left blank')
+        parser.add_argument('covid_date', type=int, required=False, help='This field cannot be left blank')
         parser.add_argument('seoul_cases', type=int, required=False, help='This field cannot be left blank')
         parser.add_argument('seoul_death', type=int, required=False, help='This field cannot be left blank')
         parser.add_argument('total_cases', type=int, required=False, help='This field cannot be left blank')
@@ -15,7 +14,7 @@ class KoreaCovid(Resource):
 
     def post(self):
         data = self.parset.parse_args()
-        koreacovid =KoreaDto(data['covid_id'],data['date'],data['seoul_cases'],data['seoul_cases'],data['total_cases'],data['total_death'])
+        koreacovid =KoreaDto(data['covid_date'],data['seoul_cases'],data['seoul_cases'],data['total_cases'],data['total_death'])
         
         try:
             koreacovid.save()
@@ -23,19 +22,18 @@ class KoreaCovid(Resource):
             return {'message':'An error occured inserting the koreacovid'}, 500
         return koreacovid.json(), 201
 
-    def get(self,covid_id):
-        koreacovid = KoreaDao.find_by_id(covid_id)
+    def get(self,covid_date):
+        koreacovid = KoreaDao.find_by_id(covid_date)
         if koreacovid:
             return koreacovid.json()
         return {'message': 'koreacovid not found'}, 404
 
-    def put (self, covid_id):
+    def put (self, covid_date):
         data = KoreaCovid.parser.parse_args()
-        koreacovid = KoreaDto.find_by_id(covid_id)
+        koreacovid = KoreaDto.find_by_id(covid_date)
 
-        koreacovid.date = data['date']
         koreacovid.seoul_cases = data['seoul_cases']
-        koreacovid.seoul_death= data['seoul_deatb']
+        koreacovid.seoul_death= data['seoul_death']
         koreacovid.total_cases = data['total_cases']
         koreacovid.total_death= data['total_deatb']
         koreacovid.save()

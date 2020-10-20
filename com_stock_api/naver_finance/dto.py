@@ -1,14 +1,12 @@
 from com_stock_api.ext.db import db 
-# from com_stock_api.kospi_pred.dto import KospiDto
-# from com_stock_api.korea_covid.dto import KoreaDto
-# from com_stock_api.naver_news.dto import NewsDto
+
 
 class StockDto(db.Model):
     __tablename__ = 'naver_finance'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    stock_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
-    date : date = db.Column(db.DATE)
+    
+    finance_date : int = db.Column(db.DATE, primary_key = True, index=True)
     open : int = db.Column(db.VARCHAR(30))
     close : int = db.Column(db.VARCHAR(30))
     high : int = db.Column(db.VARCHAR(30))
@@ -16,9 +14,8 @@ class StockDto(db.Model):
     amount : int = db.Column(db.VARCHAR(30))
     stock : str = db.Column(db.VARCHAR(30))
     
-    def __init__(self, stock_id, date, open, close, high, low, amount, stock):
-        self.stock_id = stock_id
-        self.date = date
+    def __init__(self,finance_date, open, close, high, low, amount, stock):
+        self.finance_date = finance_date
         self.open = open
         self.close = close
         self.high = high
@@ -27,14 +24,13 @@ class StockDto(db.Model):
         self.stock = stock
     
     def __repr__(self):
-        return f'stock_id={self.stock_id}, date={self.date}, open={self.open},\
+        return f'finance_date={self.finance_date}, open={self.open},\
             close ={self.close},high ={self.high},low ={self.low},amount ={self.amount},stock ={self.stock}'
             
     @property
     def json(self):
         return {
-            'stock_id': self.stock_id,
-            'date': self.date,
+            'finance_date': self.finance_date,
             'open': self.open,
             'close': self.close,
             'high': self.high,

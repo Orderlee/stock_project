@@ -6,9 +6,10 @@ from com_stock_api.korea_covid.api import KoreaCovid,KoreaCovids
 from com_stock_api.kospi_pred.api import Kospi,Kospis
 from com_stock_api.naver_finance.api import Stock,Stocks
 from com_stock_api.naver_news.api import News,News_
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 print('========= url ===========')
 print(url)
 app.config['SQLALCHEMY_DATABASE_URI'] =url
@@ -24,5 +25,9 @@ initialize_routes(api)
 
 with app.app_context():
     db.init_app(app)
-    print(f'db created ... ')
+    #print(f'db created ... ')
     db.create_all()
+
+@app.route('/api/test')
+def test():
+    return{'test':'SUCCESS'}
