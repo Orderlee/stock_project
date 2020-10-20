@@ -7,14 +7,13 @@ class KospiDto(db.Model):
     __tablename__ = 'kospi_pred'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    kospi_id : int = db.Column(db.VARCHAR(30), primary_key = True, index=True)
-    date : int = db.Column(db.DATETIME)
+    kospi_date : int = db.Column(db.DATETIME, primary_key = True, index=True)
     stock :int = db.Column(db.VARCHAR(30))
     price : int = db.Column(db.VARCHAR(30))
 
-    date: int = db.Column(db.DATETIME, db.ForeignKey(KoreaDto.date))
-    date: int = db.Column(db.DATETIME, db.ForeignKey(StockDto.date))
-    date: int = db.Column(db.DATETIME, db.ForeignKey(NewsDto.date))
+    covid_date: int = db.Column(db.DATETIME, db.ForeignKey(KoreaDto.date))
+    stock_date: int = db.Column(db.DATETIME, db.ForeignKey(StockDto.date))
+    news_date: int = db.Column(db.DATETIME, db.ForeignKey(NewsDto.date))
 
 
     def __init__(self, kospi_id, date, stock, price):
@@ -24,14 +23,16 @@ class KospiDto(db.Model):
         self.price = price
     
     def __repr__(self):
-        return f'kospi_id={self.kospi_id}, date={self.date}, stock={self.stock},\
+        return f'kospi_date={self.kospi_date},covid_date={self.covid_date},stock_date={self.stock_date},news_date={self.news_date},  stock={self.stock},\
             price={self.price}'
             
     @property
     def json(self):
         return {
-            'kospi_id': self.kospi_id,
-            'date': self.date,
+            'kospi_date': self.kospi_date,
+            'covid_date': self.covid_date,
+            'stock_date': self.stock_date,
+            'news_date': self.news_date,
             'stock' : self.stock,
             'price' : self.price
         }
