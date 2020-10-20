@@ -16,9 +16,11 @@ class KospiDto(db.Model):
     news_date: int = db.Column(db.DATETIME, db.ForeignKey(NewsDto.date))
 
 
-    def __init__(self, kospi_id, date, stock, price):
-        self.kospi_id = kospi_id
-        self.date = date
+    def __init__(self,kospi_date, covid_date,stock_date,news_date,stock, price):
+        self.kospi_date = kospi_date
+        self.covid_date = covid_date
+        self.stock_date = stock_date
+        self.news_date= snews_date
         self.stock = stock
         self.price = price
     
