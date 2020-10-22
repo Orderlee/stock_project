@@ -1,5 +1,6 @@
 from com_stock_api.ext.db import db
 
+
 class StockDao():
 
     @classmethod

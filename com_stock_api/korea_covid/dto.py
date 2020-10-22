@@ -1,7 +1,20 @@
 from com_stock_api.ext.db import db 
-# from com_stock_api.kospi_pred.dto import KospiDto
-# from com_stock_api.naver_finance.dto import StockDto
-# from com_stock_api.naver_news.dto import NewsDto
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import create_engine
+from com_stock_api.korea_covid.service import CovidService
+
+config = {
+    'user': 'root',
+    'password': 'root',
+    'host': '127.0.0.1',
+    'port': '3306',
+    'database': 'mariadb'
+}
+
+charset = {'utf8': 'utf8'}
+url = f'mysql+mysqlconnector://{config["user"]}:{config["password"]}@{config["host"]}:{config["port"]}/{config["database"]}?charset=utf8'
+engine = create_engine(url)
+
 
 class KoreaDto(db.Model):
     __tablename__ = 'korea_covid'
@@ -45,6 +58,14 @@ class KoreaDto(db.Model):
         db.session.commit()
 
 
+service = CovidService()
+Session = sessionmaker(bind=engine)
+s = Session()
+df = service.hook()
+print(df.head())
+s.bulk_insert_mappings(KoreaDto, df.to_dict(orient="records"))
+s.commit()
+s.close()
 
 
   

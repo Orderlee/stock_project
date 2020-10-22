@@ -2,9 +2,7 @@ from com_stock_api.ext.db import db
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy import create_engine
 from com_stock_api.naver_news.analysis import NewsAnalysis
-from com_stock_api.kospi_pred.dto import KospiDto
-from com_stock_api.korea_covid.dto import KoreaDto
-from com_stock_api.naver_finance.dto import StockDto
+
 
 config = {
     'user' : 'root',
@@ -30,9 +28,6 @@ class NewsDto(db.Model):
     stock : str = db.Column(db.String(30))
     label : float = db.Column(db.Float)
 
-
-
-    #'date', 'headline', 'contents', 'url', 'stock', 'label'
 
     
     def __init__(self, id, date, headline, contents, url, stock, label):

@@ -6,7 +6,7 @@ import re
 
 
 class StockService():
-
+    
     def __init__(self):
         self.stock_code = None
 
@@ -21,9 +21,12 @@ class StockService():
         #stock_code.to_csv('/Users/YoungWoo/stock_crawl/company.csv', index=False, encoding='UTF-8')
         #code_df.head()
         self.stock_code = stock_code
+        
 
 
     def serach_stock(self,companyname):
+        print(f'ENTER STEP 2 : search_stock ')
+        print(f'companyname : {companyname}')
         result=[]
         
         stock_code = self.stock_code
@@ -36,7 +39,7 @@ class StockService():
             return price
             #print(type(price))
 
-        for i in range(1,90):
+        for i in range(1,10):
             url='https://finance.naver.com/item/sise_day.nhn?code='+str(plusUrl)+'&page={}'.format(i)
             response=requests.get(url)
             text=response.text
@@ -68,10 +71,11 @@ class StockService():
         #df_temp
         df_temp.drop(['up/down', 'pastday'], axis='columns', inplace=True)
         df_temp['stock']=plusUrl
-        return df_temp
+        # return df_temp
 
-
-service = StockService()
-service.new_model
-df_result = service.serach_stock('lg이노텍')
-print(df_result.head())
+    def stockcrawl(self):
+        service = StockService()
+        service.new_model()
+        df_temp = service.serach_stock()
+        print(df_temp.columns)
+        print(df_temp.head())

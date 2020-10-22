@@ -7,7 +7,7 @@ from com_stock_api.util.file_reader import FileReader
 from com_stock_api.util.checker import is_number
 from collections import defaultdict
 import math
-from com_stock_api.naver_news.service import NewsService
+from com_stock_api.naver_news.service_test import NewsService
 
 class NewsAnalysis:
     def __init__(self,k = 0.5):
@@ -89,7 +89,8 @@ class NewsAnalysis:
         service = NewsService()
         service.new_model()
         # 3. CRUD
-        df_result = service.search_news('lg이노텍')
+        #df_result = service.search_news()
+        df_result=pd.read_csv('/Users/YoungWoo/stock_psychic_api/com_stock_api/naver_news/data')
         # 4. Eval
 
         df_result['label']= 0.0
