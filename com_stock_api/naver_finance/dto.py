@@ -1,27 +1,10 @@
 from com_stock_api.ext.db import db 
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy import create_engine
-from com_stock_api.naver_finance.service_test import StockService
-
-
-config = {
-    'user' : 'root',
-    'password' : 'root',
-    'host': '127.0.0.1',
-    'port' : '3306',
-    'database' : 'stockdb'
-}
-charset ={'utf8':'utf8'}
-url = f"mysql+mysqlconnector://{config['user']}:{config['password']}@{config['host']}:{config['port']}/{config['database']}?charset=utf8"
-
-engine = create_engine(url)
-
 
 class StockDto(db.Model):
     __tablename__ = 'naver_finance'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    id: int = db.Column(db.Integer, primary_key = True, index = True)
+    id: str = db.Column(db.Integer, primary_key = True, index = True)
     date : str = db.Column(db.DATETIME)
     open : int = db.Column(db.String(30))
     close : int = db.Column(db.String(30))
@@ -57,23 +40,16 @@ class StockDto(db.Model):
             'stock' : self.stock
         }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+class StockVo:
+    id: str = ''
+    open: int =''
+    close: int =''
+    high: int =''
+    low: int =''
+    amount: int =''
+    stock: str=''
 
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
-
-service = StockService()
-Session = sessionmaker(bind = engine)
-s = Session()
-df_temp = service.stockcrawl()
-print(df_temp.head())
-s.bulk_insert_mappings(StockDto, df_temp.to_dict(orient="records"))
-s.commit()
-s.close()
 
 
 

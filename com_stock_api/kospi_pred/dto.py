@@ -7,27 +7,27 @@ class KospiDto(db.Model):
     __tablename__ = 'kospi_pred'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    id: int = db.Column(db.Integer, primary_key = True, index = True)
+    id: str = db.Column(db.Integer, primary_key = True, index = True)
     date : str = db.Column(db.DATETIME)
-    stock :int = db.Column(db.VARCHAR(30))
+    ticker : str = db.Column(db.VARCHAR(30))
     price : int = db.Column(db.VARCHAR(30))
 
-    covid_id: int = db.Column(db.Integer, db.ForeignKey(KoreaDto.id))
-    stock_id: int = db.Column(db.Integer, db.ForeignKey(StockDto.id))
-    news_id: int = db.Column(db.Integer, db.ForeignKey(NewsDto.id))
+    covid_id: str = db.Column(db.Integer, db.ForeignKey(KoreaDto.id))
+    stock_id: str = db.Column(db.Integer, db.ForeignKey(StockDto.id))
+    news_id: str = db.Column(db.Integer, db.ForeignKey(NewsDto.id))
 
 
-    def __init__(self,id,date, covid_id,stock_id,news_id,stock, price):
+    def __init__(self,id,date, covid_id,stock_id,news_id,ticker, price):
         self.id = id
         self.date = date
         self.covid_id = covid_id
         self.stock_id= stock_id
         self.news_id= news_id
-        self.stock = stock
+        self.ticker= ticker
         self.price = price
     
     def __repr__(self):
-        return f'id={self.id},date={self.date},covid_id ={self.covid_id },stock_id={self.sstock_id},news_id={self.news_id},  stock={self.stock},\
+        return f'id={self.id},date={self.date},covid_id ={self.covid_id },stock_id={self.stock_id},news_id={self.news_id},  ticker={self.ticker},\
             price={self.price}'
             
     @property
@@ -38,19 +38,19 @@ class KospiDto(db.Model):
             'covid_id': self.covid_id,
             'stock_id': self.stock_id,
             'news_id': self.news_id,
-            'stock' : self.stock,
+            'ticker' : self.ticker,
             'price' : self.price
         }
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+class KospiVo:
+    id : str =''
+    date : str =''
+    ticker: str =''
+    price : int =''
+    covid_id : str =''
+    stock_id : str =''
+    news_id : str ='' 
 
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
 
 
 
-
-  

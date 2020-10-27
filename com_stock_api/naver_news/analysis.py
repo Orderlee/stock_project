@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*- 
 import os
-import sys
+basedir = os.path.abspath(os.path.dirname(__file__))
 import numpy as np
 import pandas as pd
 from pandas import read_table
@@ -7,13 +8,11 @@ from com_stock_api.util.file_reader import FileReader
 from com_stock_api.util.checker import is_number
 from collections import defaultdict
 import math
-#from com_stock_api.naver_news.service_backup import NewsService
-# sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-# basedir = os.path.abspath(os.path.dirname(__file__))
-
+from com_stock_api.naver_news.service_backup import NewsService
 
 class NewsAnalysis:
     def __init__(self,k = 0.5):
+        print(f'basedir: {basedir}')
         self.k = k
         self.data = os.path.abspath(__file__+"/.."+"/data/")
         #print(self.data) -> /Users/YoungWoo/stock_psychic_api/com_stock_api/naver_news/data
@@ -26,8 +25,8 @@ class NewsAnalysis:
         num_class0 = len([1 for _, point in training_set if point > 3.5])
         num_class1 = len(training_set) - num_class0
         word_counts = self.count_words(training_set)
-        word_probs = self.word_probabilities(word_counts, num_class0, num_class1, self.k)
-        return word_probs
+        self.word_probs = self.word_probabilities(word_counts, num_class0, num_class1, self.k)
+
     
 
     def load_corpus(self):
@@ -77,49 +76,35 @@ class NewsAnalysis:
 
   
 
-    def classify(self,traing_set,word_probs):
-        for doc, point in traing_set:
-            self.class0_probability(word_probs, doc)
-
-        return self.class0_probability(word_probs, doc)
+    def classify(self,doc):
+        return self.class0_probability(self.word_probs, doc)
 
         
 
-    def hook(self):
+    def hook(self,txt):
         print('====hook====')
-        df = self.train()
-        print(type(df))
-        df[1:100]
-        print(len(df))
-        return self.classify('a')
-
+        self.train()
+        return self.classify(txt)
+        
 
     def makelabel(self):
-        path = self.data
-        df_result = pd.read_csv(path + '/011070.csv',encoding='UTF-8')
-        
         # 1. 수집 
         # 2. 모델
-        nas = NewsAnalysis()
-        # service.new_model()
+        service = NewsService()
+        service.new_model()
         # 3. CRUD
-        #df_result = service.search_news('lg화학')
-        df_result=nas.hook()
+        df_result = service.search_news('lg이노텍')
         # 4. Eval
+        path = self.data
 
         df_result['label']= 0.0
-        for i in range(0,2398):
-            df_result['label'][i] = '%.2f' % (df_result['contents'][i])
-
-
-        df_result.to_csv(path + 'lgchem.csv',encoding='UTF-8')
+        for i in range(0,696):
+            df_result['label'][i] = '%.2f' % self.hook(df_result['contents'][i])
+        
+        df_result.to_csv(path + '/lginnotek.csv',encoding='UTF-8')
 
         return df_result
-        
 
 if __name__=='__main__':
-    nas = NewsAnalysis()
-    nas.makelabel()
-
-class UserService:
-    ...
+    service = NewsAnalysis()
+    service.makelabel()
