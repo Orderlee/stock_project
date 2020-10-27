@@ -99,7 +99,7 @@ class NewsService():
                 # #print(source_result)
 
 
-            result= {"date" : date_result, "headline" : title_result, "contents" : article_result, "url" : link_result,"stock":plusUrl.zfill(6)} 
+            result= {"date" : date_result, "headline" : title_result, "contents" : article_result, "url" : link_result,"ticker":plusUrl.zfill(6)} 
             # press" : source_result
             df_result = pd.DataFrame(result)
             return df_result

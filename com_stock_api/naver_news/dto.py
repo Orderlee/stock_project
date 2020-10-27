@@ -9,24 +9,24 @@ class NewsDto(db.Model):
     headline : str = db.Column(db.String(255))
     contents : str = db.Column(db.String(10000))
     url :str = db.Column(db.String(500))
-    stock : str = db.Column(db.String(30))
+    ticker : str = db.Column(db.String(30))
     label : float = db.Column(db.Float)
 
 
     
-    def __init__(self, id, date, headline, contents, url, stock, label):
+    def __init__(self, id, date, headline, contents, url, ticker, label):
         self.id = id
         self.date = date
         self.headline = headline
         self.contents = contents
         self.url = url
-        self.stock = stock
+        self.ticker = ticker
         self.label = label
         
     
     def __repr__(self):
         return f'id={self.id},date={self.date}, headline={self.headline},\
-            contents={self.contents},url={self.url},stock={self.stock},label={self.label}'
+            contents={self.contents},url={self.url},ticker={self.ticker},label={self.label}'
             
     @property
     def json(self):
@@ -36,7 +36,7 @@ class NewsDto(db.Model):
             'headline':self.headline,
             'contents':self.contents,
             'url':self.url,
-            'stock':self.stock,
+            'ticker':self.ticker,
             'label':self.label
         }
 
@@ -46,16 +46,5 @@ class NewsVo:
     headline: str=''
     contents: str=''
     url: str =''
-    stock: str =''
+    ticker: str =''
     label: float =''
-
-
-
-
-    id: str = db.Column(db.Integer, primary_key = True, index = True)
-    date : str = db.Column(db.DATETIME)
-    headline : str = db.Column(db.String(255))
-    contents : str = db.Column(db.String(10000))
-    url :str = db.Column(db.String(500))
-    stock : str = db.Column(db.String(30))
-    label : float

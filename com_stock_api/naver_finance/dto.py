@@ -11,9 +11,9 @@ class StockDto(db.Model):
     high : int = db.Column(db.String(30))
     low :int = db.Column(db.String(30))
     amount : int = db.Column(db.String(30))
-    stock : str = db.Column(db.String(30))
+    ticker : str = db.Column(db.String(30))
   
-    def __init__(self,id,date, open, close, high, low, amount, stock):
+    def __init__(self,id,date, open, close, high, low, amount, ticker):
         self.id = id
         self.date = date
         self.open = open
@@ -21,11 +21,11 @@ class StockDto(db.Model):
         self.high = high
         self.low = low
         self.amount = amount
-        self.stock = stock
+        self.ticker = ticker
     
     def __repr__(self):
         return f'id={self.id},date={self.date}, open={self.open},\
-            close ={self.close},high ={self.high},low ={self.low},amount ={self.amount},stock ={self.stock}'
+            close ={self.close},high ={self.high},low ={self.low},amount ={self.amount},ticker ={self.ticker}'
             
     @property
     def json(self):
@@ -37,7 +37,7 @@ class StockDto(db.Model):
             'high': self.high,
             'low': self.low,
             'amount': self.amount,
-            'stock' : self.stock
+            'ticker' : self.ticker
         }
 
 class StockVo:
@@ -47,7 +47,7 @@ class StockVo:
     high: int =''
     low: int =''
     amount: int =''
-    stock: str=''
+    ticker: str=''
 
 
 

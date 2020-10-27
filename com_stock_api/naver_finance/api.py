@@ -14,7 +14,7 @@ parser.add_argument('close',type=int, required=True,help='This field should be a
 parser.add_argument('high',type=int, required=True,help='This field should be a high')
 parser.add_argument('low',type=int, required=True,help='This field should be a low')
 parser.add_argument('amount',type=int, required=True,help='This field should be a amount')
-parser.add_argument('stock',type=str, required=True,help='This field should be a stock')
+parser.add_argument('ticker',type=str, required=True,help='This field should be a stock')
 
 
 

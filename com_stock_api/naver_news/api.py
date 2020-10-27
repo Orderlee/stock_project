@@ -12,7 +12,7 @@ parser.add_argument('date', type=str, required=True, help='This field should be 
 parser.add_argument('headline', type=str, required=True, help='This field should be a headline')
 parser.add_argument('contents', type=str, required=True, help='This field should be a contents')
 parser.add_argument('url', type=str, required=True, help='This field should be a url')
-parser.add_argument('stock', type=str, required=True, help='This field should be a stock')
+parser.add_argument('ticker', type=str, required=True, help='This field should be a stock')
 parser.add_argument('label', type=float, required=True, help='This field should be a label')
 
 
