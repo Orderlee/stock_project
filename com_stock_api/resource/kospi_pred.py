@@ -55,7 +55,7 @@ class KospiDto(db.Model):
         }
 
 class KospiVo:
-    id : str =''
+    id : int = 0
     date : str =''
     ticker: str =''
     pred_price : int =''

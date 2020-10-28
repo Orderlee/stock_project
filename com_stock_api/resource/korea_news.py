@@ -159,7 +159,7 @@ class NewsDto(db.Model):
         }
 
 class NewsVo:
-    id : str =''
+    id : int = 0
     date: str =''
     headline: str=''
     content: str=''
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('id', type=str, required=True, help='This field should be a id')
+parser.add_argument('id', type=int, required=True, help='This field should be a id')
 parser.add_argument('date', type=str, required=True, help='This field should be a date')
 parser.add_argument('headline', type=str, required=True, help='This field should be a headline')
 parser.add_argument('content', type=str, required=True, help='This field should be a content')

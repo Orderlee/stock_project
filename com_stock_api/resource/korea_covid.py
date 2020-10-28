@@ -45,7 +45,7 @@ class KoreaDto(db.Model):
         }
 
 class KoreaVo:
-    id : str =''
+    id : int = 0
     date: str = ''
     seoul_cases : int =''
     seoul_death : int =''

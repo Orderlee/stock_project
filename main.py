@@ -5,6 +5,8 @@ from com_stock_api.ext.routes import initialize_routes
 from com_stock_api.resource.korea_news import NewsDao
 from com_stock_api.resource.korea_covid import KoreaDao
 from com_stock_api.resource.korea_finance import StockDao
+from com_stock_api.resource.korea_finance_recent import RecentStockDao
+from com_stock_api.resource.korea_news_recent import RecentNewsDao
 from com_stock_api.resource.kospi_pred import KospiDao
 from flask_cors import CORS
 
@@ -42,6 +44,22 @@ with app.app_context():
         #StockDao()
         s = StockDao()
         s.bulk()
+
+    recent_stock_count = RecentStockDao.count()
+    print(f'**** Recent Stock Count is {recent_stock_count} ****')
+    if recent_stock_count[0] == 0:
+        RecentStockDao()
+        #rs = RecentStockDao()
+        #rs.bulk()
+    
+    recent_news_count = RecentNewsDao.count()
+    print(f'******* Recent News Count is {recent_news_count}*****')
+    if recent_news_count[0] == 0:
+        RecentNewsDao()
+        #rn = RecentNewsDao()
+        #rn.bulk()
+
+    
 
     # pred_count = KospiDao.count()
     # print(f'***** Pred Count is {pred_count} *********')

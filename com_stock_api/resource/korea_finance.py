@@ -12,138 +12,12 @@ import pandas as pd
 import json
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-import tensorflow as tf
-from tensorflow import keras
-from keras.models import Sequential 
-from keras.layers import Dense, Activation
-from tensorflow.keras import layers
-from tensorflow.keras.layers import LSTM
-import tensorflow_datasets as tfds
-import tensorflow_hub as hub
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from keras.callbacks import EarlyStopping
-
-
-class StockService:
-
-    x_train: object = None
-    y_train: object = None
-    x_validation: object = None
-    y_validation: object = None
-    x_test: object = None
-    y_test: object = None
-    model: object = None
-
-    def __init__(self):
-        self.reader = FileReader()
-
-    def hook(self):
-        self.get_data()
-        self.create_model()
-        self.train_model()
-        self.eval_model()
-        # self.debug_model()
-        # self.get_prob()
-
-    def create_train(self, this):
-        pass
-
-    def create_label(self, this):
-        pass
-
-    def get_data(self):
-        self.reader.context = os.path.join(basedir, 'data/')
-        self.reader.fname = 'lgchem.csv'
-        data = self.reader.csv_to_dframe()
-        #print(data)
-        #(890,7)
-        #data = data.to_numpy()
-        # date,close,open,high,low,volume,stock
-        #"date",
-        xdata = data[["open","high","low","volume"]]
-        #print(xdata)
-        ydata = pd.DataFrame(data["close"])
-        #print(ydata)
-
-        xdata_ss = StandardScaler().fit_transform(xdata)
-        #print(xdata_ss)
-        ydata_ss = StandardScaler(). fit_transform(ydata)
-        #print(ydata_ss)
-
-        
-
-        x_train, x_test, y_train, y_test = train_test_split(xdata_ss,ydata_ss, test_size=0.4)
-        x_test, x_validation, y_test, y_validation = train_test_split(x_test,y_test, test_size=0.4)
-
-        self.x_train = x_train; self.x_test = x_test; self.x_validation = x_validation
-        self.y_train = y_train;  self.y_test = y_test; self.y_validation = y_validation
-        
-        print(self.x_train.shape)
-        print(self.y_test.shape)
-
-    def create_model(self):
-        print('create model')
-        model = keras.Sequential()
-
-        #LSTM으로 바꿔야함
-        model.add(layers.Dense(units=1024, input_dim=4, activation='relu'))
-        model.add(layers.Dense(units=512, activation='relu'))
-        model.add(layers.Dense(units=256, activation='relu'))
-        model.add(layers.Dense(units=128, activation='relu'))
-        model.add(layers.Dense(units=64, activation='relu'))
-        model.add(layers.Dense(units=32, activation='relu'))
-        model.add(layers.Dense(units=1))
-
-        model.compile(loss='mse', optimizer='adam', metrics=['mae'])
-
-        self.model = model
-    
-    def train_model(self):
-        es = EarlyStopping(patience=10)
-
-        # seed = 123
-        # np.random.seed(seed)
-        # tf.set_random_seed(seed)
-        hist = self.model.fit(self.x_train, self.y_train,
-        validation_data=(self.x_validation, self.y_validation), epochs=50, batch_size=16, callbacks=[es])
-        print("loss:"+ str(hist.history['loss']))
-        print("MAE:"+ str(hist.history['mae']))
-
-
-    def eval_model(self):
-        res = self.model.evaluate(self.x_test, self.y_test, batch_size=32)
-        print('loss',res[0],'mae',res[1])
-        
-        xhat = self.x_test
-        yhat = self.model.predict(xhat)
-
-        plt.figure()
-        plt.plot(yhat, label = "predicted")
-        plt.plot(self.y_test,label = "actual")
-        #xlabel=['date']
-
-        plt.legend(prop={'size': 20})
-        plt.show()
-
-        print("Evaluate : {}".format(np.average((yhat - self.y_test)**2)))
-
- 
-        
-        
-if __name__ =='__main__':
-    training = StockService()
-    training.hook()
-
-
 class StockDto(db.Model):
     __tablename__ = 'korea_finance'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
-    id: str = db.Column(db.Integer, primary_key = True, index = True)
-    date : str = db.Column(db.DATETIME)
+    id: int = db.Column(db.Integer, primary_key = True, index = True)
+    date : str = db.Column(db.DATE)
     open : int = db.Column(db.String(30))
     close : int = db.Column(db.String(30))
     high : int = db.Column(db.String(30))
@@ -169,7 +43,7 @@ class StockDto(db.Model):
     def json(self):
         return {
             'id':self.id,
-            'finance': self.date,
+            'date': self.date,
             'open': self.open,
             'close': self.close,
             'high': self.high,
@@ -179,7 +53,8 @@ class StockDto(db.Model):
         }
 
 class StockVo:
-    id: str = ''
+    id: int = 0
+    date: str=''
     open: int =''
     close: int =''
     high: int =''
@@ -277,7 +152,7 @@ if __name__ == "__main__":
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('id',type=str, required=True,help='This field should be a id')
+parser.add_argument('id',type=int, required=True,help='This field should be a id')
 parser.add_argument('date',type=str, required=True,help='This field should be a date')
 parser.add_argument('open',type=int, required=True,help='This field should be a open')
 parser.add_argument('close',type=int, required=True,help='This field should be a close')
