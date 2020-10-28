@@ -125,18 +125,18 @@ class NewsDto(db.Model):
     id: str = db.Column(db.Integer, primary_key = True, index = True)
     date : str = db.Column(db.DATETIME)
     headline : str = db.Column(db.String(255))
-    contents : str = db.Column(db.String(10000))
+    content : str = db.Column(db.Text) #String(10000)
     url :str = db.Column(db.String(500))
     ticker : str = db.Column(db.String(30))
     label : float = db.Column(db.Float)
 
 
     
-    def __init__(self, id, date, headline, contents, url, ticker, label):
+    def __init__(self, id, date, headline, content, url, ticker, label):
         self.id = id
         self.date = date
         self.headline = headline
-        self.contents = contents
+        self.content = content
         self.url = url
         self.ticker = ticker
         self.label = label
@@ -144,7 +144,7 @@ class NewsDto(db.Model):
     
     def __repr__(self):
         return f'id={self.id},date={self.date}, headline={self.headline},\
-            contents={self.contents},url={self.url},ticker={self.ticker},label={self.label}'
+            content={self.content},url={self.url},ticker={self.ticker},label={self.label}'
             
     @property
     def json(self):
@@ -152,7 +152,7 @@ class NewsDto(db.Model):
             'id':self.id,
             'date': self.date,
             'headline':self.headline,
-            'contents':self.contents,
+            'content':self.ccontent,
             'url':self.url,
             'ticker':self.ticker,
             'label':self.label
@@ -162,7 +162,7 @@ class NewsVo:
     id : str =''
     date: str =''
     headline: str=''
-    contents: str=''
+    content: str=''
     url: str =''
     ticker: str =''
     label: float =''
@@ -254,7 +254,7 @@ parser = reqparse.RequestParser()
 parser.add_argument('id', type=str, required=True, help='This field should be a id')
 parser.add_argument('date', type=str, required=True, help='This field should be a date')
 parser.add_argument('headline', type=str, required=True, help='This field should be a headline')
-parser.add_argument('contents', type=str, required=True, help='This field should be a contents')
+parser.add_argument('content', type=str, required=True, help='This field should be a content')
 parser.add_argument('url', type=str, required=True, help='This field should be a url')
 parser.add_argument('ticker', type=str, required=True, help='This field should be a stock')
 parser.add_argument('label', type=float, required=True, help='This field should be a label')
