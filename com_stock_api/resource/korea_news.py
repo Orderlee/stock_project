@@ -184,7 +184,11 @@ class NewsDao(NewsDto):
         #service = NewsService()
         #df = service.hook()
         path = self.data
-        df=pd.read_csv( path +'/011070.csv',encoding='utf-8',dtype=str)
+        companys = ['011070','051910']
+        for com in companys:
+            file_name = com +'.csv'
+            input_file = os.path.join(path,file_name)
+            df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
         print(df.head())
         session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
         session.commit()

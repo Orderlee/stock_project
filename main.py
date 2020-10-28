@@ -48,14 +48,14 @@ with app.app_context():
     recent_stock_count = RecentStockDao.count()
     print(f'**** Recent Stock Count is {recent_stock_count} ****')
     if recent_stock_count[0] == 0:
-        RecentStockDao()
+        RecentStockDao.bulk()
         #rs = RecentStockDao()
         #rs.bulk()
     
     recent_news_count = RecentNewsDao.count()
     print(f'******* Recent News Count is {recent_news_count}*****')
     if recent_news_count[0] == 0:
-        RecentNewsDao()
+        RecentNewsDao.bulk()
         #rn = RecentNewsDao()
         #rn.bulk()
 

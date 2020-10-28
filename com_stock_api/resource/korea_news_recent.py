@@ -16,6 +16,7 @@ from pathlib import Path
 from flask import jsonify
 import json
 
+
 class KoreaNews():
     
     def __init__(self):
@@ -48,7 +49,7 @@ class KoreaNews():
         
         
        
-        for i in range(1,5):
+        for i in range(1,10):
 
             url = 'https://finance.naver.com/item/news_news.nhn?code='+ str(plusUrl)+'&page={}'.format(i)
             #print(f'url : {url}')
@@ -105,8 +106,9 @@ class KoreaNews():
             result= {"date" : date_result, "headline" : title_result, "content" : article_result, "url" : link_result,"ticker":plusUrl.zfill(6)} 
             # press" : source_result
             df_result = pd.DataFrame(result)
-            df_result['date']=pd.to_datetime(df_result['date'])
-            df_result.set_index('date', inplace=True)
+            #df_result['date']=pd.to_datetime(df_result['date'].astype(str), format='%Y/%m/%d')
+            #df_result.set_index('date', inplace=True)
+            #print(df_result['date'])
         return df_result
                         
 
@@ -124,13 +126,13 @@ class NewsDto(db.Model):
     url :str = db.Column(db.String(500))
     ticker : str = db.Column(db.String(30))
     
-    # def __init__(self, id, date, headline, content, url, ticker):
-    #     self.id = id
-    #     self.date = date
-    #     self.headline = headline
-    #     self.content = content
-    #     self.url = url
-    #     self.ticker = ticker
+    def __init__(self, id, date, headline, content, url, ticker):
+        self.id = id
+        self.date = date
+        self.headline = headline
+        self.content = content
+        self.url = url
+        self.ticker = ticker
         
     
     def __repr__(self):
@@ -173,13 +175,15 @@ class RecentNewsDao(NewsDto):
     def bulk(): #self
         kn = KoreaNews()
         kn.new_model()
-        df = kn.search_news('lg화학')
-        #df = service.hook()
-        # path = self.data
-        # df=pd.read_csv( path +'/011070.csv',encoding='utf-8',dtype=str)
-        print(df.head()) 
-        session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
-        session.commit()
+        companys = ['lg화학','lg이노텍']
+        for com in companys:
+            df = kn.search_news(com)
+            #df = service.hook()
+            # path = self.data
+            # df=pd.read_csv( path +'/011070.csv',encoding='utf-8',dtype=str)
+            print(df.head()) 
+            session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
+            session.commit()
         session.close()
     
     @staticmethod
@@ -230,9 +234,9 @@ class RecentNewsDao(NewsDto):
 
 
 if __name__ == "__main__":
-    #RecentNewsDao.bulk()
-    n = RecentNewsDao()
-    n.bulk()
+    RecentNewsDao.bulk()
+    #n = RecentNewsDao()
+    #n.bulk()
 
 
 # ==============================================================

@@ -12,6 +12,7 @@ import pandas as pd
 import json
 
 
+
 class StockDto(db.Model):
     __tablename__ = 'korea_finance'
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
@@ -77,10 +78,14 @@ class StockDao(StockDto):
         #service = StockService()
         #df = service.hook()
         path = self.data
-        df = pd.read_csv(path +'/lgchem.csv',encoding='utf-8',dtype=str)
-        print(df.head())
-        session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
-        session.commit()
+        companys = ['lgchem','lginnotek']
+        for com in companys:
+            file_name = com +'.csv'
+            input_file = os.path.join(path,file_name)
+            df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
+            print(df.head())
+            session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
+            session.commit()
         session.close()
     
     @staticmethod

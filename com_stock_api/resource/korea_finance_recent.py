@@ -13,6 +13,10 @@ from sqlalchemy import func
 from pathlib import Path
 from flask import jsonify
 import json
+from mysql.connector.dbapi import Date
+from sqlalchemy.dialects.mysql import DATE
+
+
 
 class KoreaStock():
     
@@ -76,8 +80,10 @@ class KoreaStock():
                 df_result=pd.DataFrame(result,columns=['date','close','up/down','pastday','open','high','low','volume'])
                 df_result['ticker']=plusUrl 
                 df_result.drop(['up/down', 'pastday'], axis='columns', inplace=True)
-                df_result['date']=pd.to_datetime(df_result['date'])
-                df_result.set_index('date', inplace=True)
+                #df_result['date']=pd.to_datetime(df_result['date'].astype(str), format='%Y/%m/%d')
+                #print(df_result['date'])
+                #df_result.set_index('date', inplace=True)
+                
             return df_result
                 
 # if __name__ == "__main__":
@@ -93,7 +99,7 @@ class StockDto(db.Model):
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
     id: int = db.Column(db.Integer, primary_key = True, index = True)
-    date : str = db.Column(db.DATE)
+    date : str = db.Column(DATE)
     open : int = db.Column(db.String(30))
     close : int = db.Column(db.String(30))
     high : int = db.Column(db.String(30))
@@ -101,15 +107,15 @@ class StockDto(db.Model):
     volume : int = db.Column(db.String(30))
     ticker : str = db.Column(db.String(30))
 
-    # def __init__(self,id, date, open, close, high, low, volume, ticker):
-    #     self.id = id
-    #     self.date = date
-    #     self.open = open
-    #     self.close = close
-    #     self.high = high
-    #     self.low = low
-    #     self.volume = volume
-    #     self.ticker = ticker
+    def __init__(self,id, date, open, close, high, low, volume, ticker):
+        self.id = id
+        self.date = date
+        self.open = open
+        self.close = close
+        self.high = high
+        self.low = low
+        self.volume = volume
+        self.ticker = ticker
     
     def __repr__(self):
         return f'id={self.id}, date={self.date}, open={self.open},\
@@ -154,12 +160,15 @@ class RecentStockDao(StockDto):
     def bulk():   #self
         krs = KoreaStock()
         krs.new_model()
-        df = krs.search_stock('lg화학')
-        #path = self.data
-        #df = pd.read_csv(path +'/lgchem.csv',encoding='utf-8',dtype=str)
-        print(df.head())
-        session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
-        session.commit()
+        companys = ['lg화학','lg이노텍']
+        for com in companys:
+            df = krs.search_stock(com)
+            #return df
+            #path = self.data
+            #df = pd.read_csv(path +'/lgchem.csv',encoding='utf-8',dtype=str)
+            print(df.head())
+            session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
+            session.commit()
         session.close()
     
     @staticmethod
@@ -210,9 +219,9 @@ class RecentStockDao(StockDto):
     
 
 if __name__ == "__main__":
-    #RecentStockDao.bulk()
-    s = RecentStockDao()
-    s.bulk()
+    RecentStockDao.bulk()
+    #s = RecentStockDao()
+    #s.bulk()
 
     
 
