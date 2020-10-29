@@ -4,8 +4,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 import numpy as np
 import pandas as pd
 from pandas import read_table
-from com_stock_api.util.file_reader import FileReader
-from com_stock_api.util.checker import is_number
+from com_stock_api.utils.file_helper import FileReader
+from com_stock_api.utils.checker import is_number
 from collections import defaultdict
 import math
 from com_stock_api.naver_news.service_backup import NewsService
@@ -99,9 +99,9 @@ class NewsAnalysis:
         
 
         df_result['label']= 0.0
-        for i in range(0,2500,50):
+        for i in range(0,2500):
             try:
-                df_result['label'][i] = '%.2f' % self.hook(df_result['content'][::100][i])
+                df_result['label'][i] = '%.2f' % self.hook(df_result['content'][i])
             except KeyError : 
                 pass
         

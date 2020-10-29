@@ -1,4 +1,4 @@
-from com_stock_api.home.api import Home
+# from com_stock_api.home.api import Home
 # from com_stock_api.korea_covid.api import KoreaCovid,KoreaCovids
 # from com_stock_api.kospi_pred.api import Kospi,Kospis
 # from com_stock_api.naver_finance.api import Stock,Stocks

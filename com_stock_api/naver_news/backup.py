@@ -108,8 +108,8 @@
 # import numpy as np
 # import pandas as pd
 # from pandas import read_table
-# from com_stock_api.util.file_reader import FileReader
-# from com_stock_api.util.checker import is_number
+# from com_stock_api.utils.file_helper import FileReader
+# from com_stock_api.utils.checker import is_number
 # from collections import defaultdict
 # import math
 # from com_stock_api.naver_news.service_backup import NewsService
