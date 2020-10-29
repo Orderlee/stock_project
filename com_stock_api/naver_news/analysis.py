@@ -94,7 +94,7 @@ class NewsAnalysis:
         #service = NewsService()
         #service.new_model()
         # 3. CRUD
-        df_result = pd.read_csv('/Users/YoungWoo/stock_psychic_api/com_stock_api/resource/data/051910.csv',encoding='utf-8', dtype=str)
+        df_result = pd.read_csv('/Users/YoungWoo/stock_psychic_api/com_stock_api/resource/data/011070.csv',encoding='utf-8', dtype=str)
         # 4. Eval
         
 
@@ -105,7 +105,7 @@ class NewsAnalysis:
             except KeyError : 
                 pass
         
-        df_result.to_csv(path + '/lgchem1.csv',encoding='UTF-8')
+        df_result.to_csv(path + '/lginnotek1.csv',encoding='UTF-8')
 
         return df_result
 
