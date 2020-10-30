@@ -17,6 +17,11 @@ from mysql.connector.dbapi import Date
 from sqlalchemy.dialects.mysql import DATE
 
 
+# ==============================================================
+# =========================                =====================
+# =========================  Data Mining   =====================
+# =========================                =====================
+# ==============================================================
 
 class KoreaStock():
     
@@ -86,11 +91,6 @@ class KoreaStock():
                 
             return df_result
                 
-# if __name__ == "__main__":
-#     ks = KoreaStock()
-#     ks.new_model()
-#     df_result = ks.search_stock('lg화학')
-#     print(df_result)
 
 
 
@@ -157,22 +157,15 @@ session= Session()
 
 
 
-
 class RecentStockDao(StockDto):
 
-    # def __init__(self):
-    #     self.data = os.path.abspath(__file__+"/.."+"/data/")
-
     @staticmethod
-    def bulk():   #self
+    def bulk(): 
         krs = KoreaStock()
         krs.new_model()
         companys = ['lg화학','lg이노텍']
         for com in companys:
             df = krs.search_stock(com)
-            #return df
-            #path = self.data
-            #df = pd.read_csv(path +'/lgchem.csv',encoding='utf-8',dtype=str)
             print(df.head())
             session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
             session.commit()
@@ -208,37 +201,42 @@ class RecentStockDao(StockDto):
 
     @classmethod
     def find_by_date(cls,date):
-        return cls.query.filter_by(date == date).all()
-
+        return session.query.filter(StockDto.date.like(date)).one()
 
     @classmethod
     def find_by_id(cls, open):
-        return cls.query.filter_by(open == open).first()
+        return session.query.filter(StockDto.open.like(open)).one()
 
     @classmethod
-    def login(cls,stock):
-        sql = cls.query.fillter(cls.id.like(stock.date)).fillter(cls.open.like(stock.open))
-        
-        df = pd.read_sql(sql.statement, sql.session.bind)
-        print('----------')
-        print(json.loads(df.to_json(orient='records')))
-        return json.loads(df.to_json(orient='records'))
+    def find_by_close(cls,close):
+        return session.query.filter(StockDto.close.like(close)).one()
     
+    @classmethod
+    def find_by_low(cls,low):
+        return session.query.filter(StockDto.low.like(low)).one()
 
-if __name__ == "__main__":
-    RecentStockDao.bulk()
-    #s = RecentStockDao()
-    #s.bulk()
+    @classmethod
+    def find_by_volume(cls,volume):
+        return session.query.filter(StockDto.volume.like(volume)).one()
 
-    
+    @classmethod
+    def find_by_ticker(cls,ticker):
+        return session.query.filter(StockDto.ticker.like(ticker)).one()
 
+    @classmethod
+    def find_by_high(cls,high):
+        return session.query.filter(StockDto.high.like(high)).one()
+
+    @classmethod
+    def find_By_id(cls,id):
+        return session.query.filter(StockDto.id.like(id)).one()
 
 
 
 # ==============================================================
-# ==============================================================
-# ==============================================================
-# ==============================================================
+# =====================                  =======================
+# =====================    Resourcing    =======================
+# =====================                  =======================
 # ==============================================================
 
 
@@ -296,7 +294,7 @@ class RecentStock(Resource):
         print(f'Stock {args["id"]} deleted')
         return {'code':0, 'message': 'SUCCESS'}, 200
 
-class Stocks(Resource):
+class RecentStocks(Resource):
     
     @staticmethod
     def get():

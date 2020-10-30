@@ -77,19 +77,12 @@ session= Session()
 
 
 class KospiDao(KospiDto):
-
-    def __init__(self):
-        self.data = os.path.abspath(__file__+"/.."+"/data/")
     
-    #@staticmethod
+    def __init__(self):
+        ...
+
     def bulk(self):
-        #service = KospiService()
-        #df = service.hook()
-        path = self.data
-        df = pd.read_csv(path+'/movie_review.csv',encoding='utf-8', dtype=str)
-        session.bulk_insert_mappings(KospiDto, df.to_dict(orient='records'))
-        session.commit()
-        session.close()
+        ...
     
     @staticmethod
     def conut():
@@ -120,34 +113,38 @@ class KospiDao(KospiDto):
 
     @classmethod
     def find_by_id(cls,id):
-        return cls.query.filter_by(id == id).all()
-
-
+        return session.query(KospiDto).filter(KospiDto.id.like(id)).one()
+        
     @classmethod
     def find_by_date(cls, date):
-        return cls.query.filter_by(date == date).first()
+        return session.query(KospiDto).filter(KospiDto.date.like(date)).one()
 
     @classmethod
-    def login(cls,kospi):
-        sql = cls.query.fillter(cls.id.like(kospi.id)).fillter(cls.date.like(kospi.date))
+    def find_by_predprice(cls,pred_price):
+        return session.query(KospiDto).filter(KospiDao.pred_price.like(pred_price)).one()
 
-        df = pd.read_sql(sql.statement, sql.session.bind)
-        print('==================')
-        print(json.loads(df.to_json(orient='records')))
-        return json.loads(df.to_sjon(orient='records'))
+    @classmethod
+    def find_by_stockid(cls,stock_id):
+        return session.query(KospiDto).filter(KospiDto.stock_id.like(stock_id)).one()
 
-if __name__ =="__main__":
-    #KospiDao.bulk()
-    kp = KospiDao()
-    kp.bulk()
+    @classmethod
+    def find_by_ticker(cls,ticker):
+        return session.query(KospiDto).filter(KospiDto.ticker.like(ticker)).one()
+
+    @classmethod
+    def find_by_covidid(cls,covid_id):
+        return session.query(KospiDto).filter(KospiDto.covid_id.like(covid_id)).one()
+
+    @classmethod
+    def fidn_by_newsid(cls,news_id):
+        return session.queryfilter(KospiDto.news_id.like(news_id)).one()
 
 
 # ==============================================================
+# =====================                  =======================
+# =====================    Resourcing    =======================
+# =====================                  =======================
 # ==============================================================
-# ==============================================================
-# ==============================================================
-# ==============================================================
-
 
 
 parser = reqparse.RequestParser()

@@ -85,10 +85,8 @@ class NewsDao(NewsDto):
     def __init__(self):
         self.data = os.path.abspath(__file__+"/.."+"/data/")
     
-    #@staticmethod
+
     def bulk(self):
-        #service = NewsService()
-        #df = service.hook()
         path = self.data
         companys = ['011070','051910']
         for com in companys:
@@ -129,34 +127,39 @@ class NewsDao(NewsDto):
 
     @classmethod
     def find_by_id(cls,id):
-        return cls.query.filter_by(id == id).all()
+        return session.query(NewsDto).filter(NewsDto.id.like(id)).one()
 
+    @classmethod
+    def find_by_date(cls,date):
+        return session.query(NewsDto).filter(NewsDto.date.like(date)).one()
 
     @classmethod
     def find_by_headline(cls, headline):
-        return cls.query.filter_by(headline == headline).first()
+        return session.query(NewsDto).filter(NewsDto.headline.like(headline)).one()
+        
+    @classmethod
+    def find_by_content(cls,content):
+        return session.query(NewsDto).filter(NewsDto.contet.like(content)).one()
 
     @classmethod
-    def login(cls,news):
-        sql = cls.query.fillter(cls.id.like(news.id)).fillter(cls.headline.like(news.headline))
+    def find_by_url(cls,url):
+        return session.query(NewsDto).filter(NewsDto.url.like(url)).one()
 
-        df = pd.read_sql(sql.statement, sql.session.bind)
-        print('============================')
-        print(json.loads(df.to_json(orient='records')))
-        return json.loads(df.to_json(orient='records'))
+    @classmethod
+    def find_by_ticker(cls,ticker):
+        return session.query(NewsDto).filter(NewsDto.ticker.like(ticker)).one()
+
+    @classmethod
+    def find_by_label(cls,label):
+        return session.query(NewsDto).filter(NewsDto.label.like(label)).one()
 
 
-
-if __name__ == "__main__":
-    #NewsDao.bulk()
-    n = NewsDao()
-    n.bulk()
 
 
 # ==============================================================
-# ==============================================================
-# ==============================================================
-# ==============================================================
+# =====================                  =======================
+# =====================    Resourcing    =======================
+# =====================                  =======================
 # ==============================================================
 
 

@@ -106,10 +106,8 @@ class KoreaDao(KoreaDto):
     def __init__(self):
         self.data = os.path.abspath(__file__+"/.."+"/data/")
 
-    #@staticmethod
+
     def bulk(self):
-        #service = CovidService()
-        #df = service.hool()
         path = self.data
         df = pd.read_csv(path +'/kor&seoul.csv', encoding='utf-8')
         print(df.head())
@@ -138,7 +136,7 @@ class KoreaDao(KoreaDto):
         db.sessio.commit()
 
     @classmethod
-    def fond_all(cls):
+    def find_all(cls):
         sql = cls.query
         df = pd.read_sql(sql.statement, sql.session.bind)
         return json.loads(df.to_json(orient='records'))
@@ -146,32 +144,33 @@ class KoreaDao(KoreaDto):
 
     @classmethod
     def find_by_id(cls,id):
-        return cls.query.filter_by(id == id).all()
+        return session.query(KoreaDto).filter(KoreaDto.id.like(id)).one()
+    @classmethod
+    def find_by_seoulcases(cls,seoul_cases):
+        return session.qeury(KoreaDto).filter(KoreaDto.seoul_cases.like(seoul_cases)).one()
 
+    @classmethod
+    def find_by_seouldeath(cls,seoul_death):
+        return session.query(KoreaDto).filter(KoreaDto.seoul_death.like(seoul_death)).one()
 
+    @classmethod
+    def find_by_totalcases(cls,total_cases):
+        return session.query(KoreaDto).filter(KoreaDto.total_cases.like(total_cases)).one()
+    
+    @classmethod
+    def find_by_totaldeath(cls,total_death):
+        return session.query(KoreaDto).filter(KoreaDto.total_death.like(total_death)).one()
+    
     @classmethod
     def find_by_date(cls, date):
-        return cls.query.filter_by(date == date).first()
+        return session.query.filter(KoreaDto.date.like(date)).one()
 
-    @classmethod
-    def login(cls,covid):
-        sql = cls.query.fillter(cls.id.like(covid.id)).fillter(cls.date.like(covid.date))
-
-        df = pd.read_sql(sql.statement, sql.session.bind)
-        print('======================')
-        print(json.loads(df.to_json(orient='records')))
-        return json.loads(df.to_json(orient='records'))
-
-if __name__ == '__main__':
-    #KoreaDao.bulk()
-    k = KoreaDao()
-    k.bulk()    
 
 
 # ==============================================================
-# ==============================================================
-# ==============================================================
-# ==============================================================
+# =====================                  =======================
+# =====================    Resourcing    =======================
+# =====================                  =======================
 # ==============================================================
 
 

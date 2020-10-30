@@ -17,6 +17,13 @@ from flask import jsonify
 import json
 
 
+# ==============================================================
+# =========================                =====================
+# =========================  Data Mining   =====================
+# =========================                =====================
+# ==============================================================
+
+
 class KoreaNews():
     
     def __init__(self):
@@ -41,7 +48,6 @@ class KoreaNews():
         title_result = []
         link_result = []
         date_result = []
-        #source_result = []
 
         stock_code = self.stock_code
         plusUrl = company.upper()
@@ -73,12 +79,6 @@ class KoreaNews():
                     #docs = htmls.find("table",{"class":"view"})
                     docs = htmls.find("div",{"class":"scr01"})
                     docs = docs.text.replace('/','').replace('?','').replace("\t",'').replace("\n",'').replace('/n','').replace('[','').replace(']','').replace('!','').replace('-','').replace('$','').replace('▲','').replace("'",'').replace('■','').replace('◆','').replace('#','').replace('_','').replace('=','').replace('"','').replace(" \'",'').replace('아웃링크','').replace('◀','').replace('▶','').replace('<','').replace('>','').replace(':','').replace(',','').replace('ⓒ','').replace('※','').replace('\xa0','').replace('&','').replace('△','').replace('이데일리','').replace('매일경제','').replace('파이낸셜뉴스','').replace('서울경제','').replace('한국경제','').replace('조선비즈','').replace('아시아경제','').replace('머니투데이','').replace('헤럴드경제','').replace('···','').replace('·','').replace('‘','').replace('’','').replace('..','').replace("“",'').replace("”",'').replace('`','').replace('…','').replace('Copyrights','').replace('━','').replace('@','').lstrip()
-            
-                    #docs = docs.get_text()
-                
-
-                    #print(type(docs))
-                    #print(docs)
                     article_result.append(docs)
                 #print(article_result)
 
@@ -89,22 +89,13 @@ class KoreaNews():
                 #print(link_result)
 
                 dates = items.select('.date') 
-                #date_result = [date.get_text() for date in dates] 
                 for date in dates:
                     date = date.get_text()
                     date_result.append(date)
                 #print(date_result)
 
-                # sources = items.select('.info')
-                # #source_result = [source.get_text() for source in sources]
-                # for source in sources:
-                #     source = source.get_text()
-                #     source_result.append(source)
-                # #print(source_result)
-
 
             result= {"date" : date_result, "headline" : title_result, "content" : article_result, "url" : link_result,"ticker":plusUrl.zfill(6)} 
-            # press" : source_result
             df_result = pd.DataFrame(result)
             #df_result['date']=pd.to_datetime(df_result['date'].astype(str), format='%Y/%m/%d')
             #df_result.set_index('date', inplace=True)
@@ -128,7 +119,7 @@ class NewsDto(db.Model):
     id: str = db.Column(db.Integer, primary_key = True, index = True)
     date : str = db.Column(db.DATETIME)
     headline : str = db.Column(db.String(255))
-    content : str = db.Column(db.Text) #String(10000)
+    content : str = db.Column(db.Text)
     url :str = db.Column(db.String(500))
     ticker : str = db.Column(db.String(30))
     
@@ -174,19 +165,13 @@ session= Session()
 
 class RecentNewsDao(NewsDto):
     
-    # def __init__(self):
-    #     self.data = os.path.abspath(__file__+"/.."+"/data/")
-    
     @staticmethod
-    def bulk(): #self
+    def bulk():
         kn = KoreaNews()
         kn.new_model()
         companys = ['lg화학','lg이노텍']
         for com in companys:
             df = kn.search_news(com)
-            #df = service.hook()
-            # path = self.data
-            # df=pd.read_csv( path +'/011070.csv',encoding='utf-8',dtype=str)
             print(df.head()) 
             session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
             session.commit()
@@ -221,13 +206,30 @@ class RecentNewsDao(NewsDto):
 
     @classmethod
     def find_by_id(cls,id):
-        return cls.query.filter_by(id == id).all()
+        return session.query(NewsDto).filter(NewsDto.id.like(id)).one()
 
+    @classmethod
+    def find_by_date(cls,date):
+        return session.query(NewsDto).filter(NewsDto.date.like(date)).one()
 
     @classmethod
     def find_by_headline(cls, headline):
-        return cls.query.filter_by(headline == headline).first()
+        return session.query(NewsDto).filter(NewsDto.headline.like(headline)).one()
 
+
+    @classmethod
+    def find_by_content(cls,content):
+        return session.query(NewsDto).filter(NewsDto.contet.like(content)).one()
+
+    @classmethod
+    def find_by_url(cls,url):
+        return session.query(NewsDto).filter(NewsDto.url.like(url)).one()
+
+    @classmethod
+    def find_by_ticker(cls,ticker):
+        return session.query(NewsDto).filter(NewsDto.ticker.like(ticker)).one()
+
+    
     @classmethod
     def login(cls,news):
         sql = cls.query.fillter(cls.id.like(news.id)).fillter(cls.headline.like(news.headline))
@@ -238,17 +240,10 @@ class RecentNewsDao(NewsDto):
         return json.loads(df.to_json(orient='records'))
 
 
-
-if __name__ == "__main__":
-    RecentNewsDao.bulk()
-    #n = RecentNewsDao()
-    #n.bulk()
-
-
 # ==============================================================
-# ==============================================================
-# ==============================================================
-# ==============================================================
+# =====================                  =======================
+# =====================    Resourcing    =======================
+# =====================                  =======================
 # ==============================================================
 
 
@@ -262,7 +257,7 @@ parser.add_argument('ticker', type=str, required=True, help='This field should b
 
 
 
-class News(Resource):
+class RecentNews(Resource):
 
     @staticmethod
     def post():
@@ -298,12 +293,12 @@ class News(Resource):
         print(f'News {args["id"]} deleted')
         return {'code':0, 'message':'SUCCESS'}, 200
 
-class News_(Resource):
+class RecentNews_(Resource):
     
     @staticmethod
     def get():
         rn = RecentNewsDao()
-        rn.insert('naver_news')
+        rn.insert('korea_recent_news')
     
     @staticmethod
     def get():
