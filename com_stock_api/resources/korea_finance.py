@@ -151,7 +151,7 @@ class StockDao(StockDto):
         return session.query.filter(StockDto.high.like(high)).one()
 
     @classmethod
-    def find_By_id(cls,id):
+    def find_by_id(cls,id):
         return session.query.filter(StockDto.id.like(id)).one()
 
 
@@ -183,10 +183,11 @@ parser.add_argument('ticker',type=str, required=True,help='This field should be 
 class Stock(Resource):
 
     @staticmethod
-    def post():
+    def post(id):
         args = parser.parse_args()
         print(f'Stock {args["id"]} added')
         params = json.loads(request.get_data(), encoding='utf-8')
+        print('eeee')
         if len (params) == 0:
             return 'No parameter'
 
@@ -203,17 +204,18 @@ class Stock(Resource):
             if stock:
                 return stock.json()
         except Exception as e:
+            print(e)
             return {'message': 'Item not found'}, 404
     
     @staticmethod
-    def update():
+    def update(id):
         args = parser.arse_args()
         print(f'Stock {args["id"]} updated')
         return {'code':0, 'message': 'SUCCESS'}, 200
 
     
     @staticmethod
-    def delete():
+    def delete(id):
         args = parser.parse_args()
         print(f'Stock {args["id"]} deleted')
         return {'code':0, 'message': 'SUCCESS'}, 200
@@ -222,6 +224,7 @@ class Stocks(Resource):
     
     @staticmethod
     def get():
+        print('eeee')
         sd = StockDao()
         sd.insert('korea_finance')
     
@@ -260,6 +263,17 @@ class Access(Resource):
 # ==============================================================
 # ==============================================================
 # ==============================================================
+
+
+
+
+
+
+
+
+
+
+
 
 
 
