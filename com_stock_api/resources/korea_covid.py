@@ -175,12 +175,12 @@ class KoreaDao(KoreaDto):
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('id',type=int, required=True,help='This field should be a id')
-parser.add_argument('date',type=str, required=True,help='This field should be a date')
-parser.add_argument('seoul_cases',type=int, required=True,help='This field should be a seoul_cases')
-parser.add_argument('seoul_death',type=int, required=True,help='This field should be a seoul_deate')
-parser.add_argument('total_cases',type=int, required=True,help='This field should be a total_cases')
-parser.add_argument('total_death',type=int, required=True,help='This field should be a password')
+parser.add_argument('id',type=int, required=True,help='This field cannot be left blank')
+parser.add_argument('date',type=str, required=True,help='This field cannot be left blank')
+parser.add_argument('seoul_cases',type=int, required=True,help='This field cannot be left blank')
+parser.add_argument('seoul_death',type=int, required=True,help='This field cannot be left blank')
+parser.add_argument('total_cases',type=int, required=True,help='This field cannot be left blank')
+parser.add_argument('total_death',type=int, required=True,help='This field cannot be left blank')
 
 
 class KoreaCovid(Resource):
@@ -199,7 +199,7 @@ class KoreaCovid(Resource):
         
     
     @staticmethod
-    def post(id):
+    def get(id: int):
         print(f'Covid {id} added')
         try:
             covid = KoreaDao.find_by_id(id)
@@ -223,7 +223,7 @@ class KoreaCovid(Resource):
 class KoreaCovids(Resource):
 
     @staticmethod
-    def get():
+    def post():
         kd = KoreaDao()
         kd.insert_many('korea_covid')
     
@@ -233,26 +233,4 @@ class KoreaCovids(Resource):
         data = KoreaDao.find_all()
         return data, 200
 
-class Auth(Resource):
 
-    @staticmethod
-    def post():
-        body = request.get_json()
-        covid = KoreaDto(**body)
-        KoreaDao.save(covid)
-        id = covid.id
-
-        return {'id': str(id)}, 200
-
-class Access(Resource):
-
-    @staticmethod
-    def post():
-        args = parser.parse_args()
-        covid = KoreaVo()
-        covid.id = args.id
-        covid.date = args.date
-        print(covid.id)
-        print(covid.date)
-        data = KoreaDao.login(covid)
-        return data[0], 200

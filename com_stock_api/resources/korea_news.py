@@ -90,12 +90,14 @@ class NewsDao(NewsDto):
         path = self.data
         companys = ['011070','051910']
         for com in companys:
+            print(f'company:{com}')
             file_name = com +'.csv'
             input_file = os.path.join(path,file_name)
             df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
-        print(df.head())
-        session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
-        session.commit()
+            del df['Unnamed: 0']
+            print(df.head())
+            session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
+            session.commit()
         session.close()
     
     @staticmethod
@@ -164,13 +166,13 @@ class NewsDao(NewsDto):
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('id', type=int, required=True, help='This field should be a id')
-parser.add_argument('date', type=str, required=True, help='This field should be a date')
-parser.add_argument('headline', type=str, required=True, help='This field should be a headline')
-parser.add_argument('content', type=str, required=True, help='This field should be a content')
-parser.add_argument('url', type=str, required=True, help='This field should be a url')
-parser.add_argument('ticker', type=str, required=True, help='This field should be a stock')
-parser.add_argument('label', type=float, required=True, help='This field should be a label')
+parser.add_argument('id', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('date', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('headline', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('content', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('url', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('ticker', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('label', type=float, required=True, help='This field cannot be left blank')
 
 
 class News(Resource):
@@ -189,7 +191,7 @@ class News(Resource):
         return {'code':0, 'message': 'SUCCESS'}, 200
     
     @staticmethod
-    def get(id):
+    def get(id: int):
         print(f'News {id} added')
         try:
             news = NewsDao.find_by_id(id)
@@ -212,7 +214,7 @@ class News(Resource):
 class News_(Resource):
     
     @staticmethod
-    def get():
+    def post():
         nd = NewsDao()
         nd.insert('naver_news')
     
@@ -221,25 +223,3 @@ class News_(Resource):
         data = NewsDao.find_all()
         return data, 200
 
-class Auth(Resource):
-    @staticmethod
-    def post():
-        body = request.get_json()
-        news = NewsDto(**body)
-        NewsDao.save(news)
-        id = news.id
-
-        return {'id': str(id)}, 200
-
-class Access(Resource):
-    
-    @staticmethod
-    def post():
-        args = parser.parse_args()
-        news = NewsVo()
-        news.id = args.id
-        news.headline = args.headline
-        print(news.id)
-        print(news.headline)
-        data = NewsDao.login(news)
-        return data[0], 200

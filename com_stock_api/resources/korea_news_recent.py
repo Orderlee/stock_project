@@ -15,6 +15,8 @@ from sqlalchemy import func
 from pathlib import Path
 from flask import jsonify
 import json
+from mysql.connector.dbapi import Date
+from sqlalchemy.dialects.mysql import DATE
 
 
 # ==============================================================
@@ -30,7 +32,6 @@ class KoreaNews():
         self.stock_code = None
 
     def new_model(self):
-        print(f'ENTER STEP 1 : new_model ')
         stock_code = pd.read_html('http://kind.krx.co.kr/corpgeneral/corpList.do?method=download&searchType=13',
                        header=0)[0]
         stock_code.종목코드=stock_code.종목코드.map('{:06d}'.format)
@@ -41,9 +42,6 @@ class KoreaNews():
         self.stock_code = stock_code
 
     def search_news(self,company):
-        print(f'ENTER STEP 2 : search_news ')
-        print(f'company : {company}')
-
         article_result =[]
         title_result = []
         link_result = []
@@ -163,15 +161,25 @@ session= Session()
 
 
 
-class RecentNewsDao(NewsDto):
+class RNewsDao(NewsDto):
     
-    @staticmethod
-    def bulk():
+    def __init__(self):
+        self.data = os.path.abspath(__file__+"/.."+"/data/")
+    
+
+    def bulk(self):
+        path = self.data
         kn = KoreaNews()
         kn.new_model()
         companys = ['lg화학','lg이노텍']
         for com in companys:
+            print(f'company:{com}')
             df = kn.search_news(com)
+            if com =='lg화학':
+                com ='lgchem'
+            elif com =='lg이노텍':
+                com='lginnotek'
+            df.to_csv(path + '/'+com+'_recent_news.csv',encoding='UTF-8')
             print(df.head()) 
             session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
             session.commit()
@@ -248,16 +256,16 @@ class RecentNewsDao(NewsDto):
 
 
 parser = reqparse.RequestParser()
-parser.add_argument('id', type=int, required=True, help='This field should be a id')
-parser.add_argument('date', type=str, required=True, help='This field should be a date')
-parser.add_argument('headline', type=str, required=True, help='This field should be a headline')
-parser.add_argument('content', type=str, required=True, help='This field should be a content')
-parser.add_argument('url', type=str, required=True, help='This field should be a url')
-parser.add_argument('ticker', type=str, required=True, help='This field should be a stock')
+parser.add_argument('id', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('date', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('headline', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('content', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('url', type=str, required=True, help='This field cannot be left blank')
+parser.add_argument('ticker', type=str, required=True, help='This field cannot be left blank')
 
 
 
-class RecentNews(Resource):
+class RNews(Resource):
 
     @staticmethod
     def post():
@@ -273,10 +281,10 @@ class RecentNews(Resource):
         return {'code':0, 'message': 'SUCCESS'}, 200
     
     @staticmethod
-    def get(id):
+    def get(id: int):
         print(f'News {id} added')
         try:
-            news = RecentNewsDao.find_by_id(id)
+            news = RNewsDao.find_by_id(id)
             if news:
                 return news.json()
         except Exception as e:
@@ -293,37 +301,15 @@ class RecentNews(Resource):
         print(f'News {args["id"]} deleted')
         return {'code':0, 'message':'SUCCESS'}, 200
 
-class RecentNews_(Resource):
+class RNews_(Resource):
     
     @staticmethod
-    def get():
-        rn = RecentNewsDao()
+    def post():
+        rn = RNewsDao()
         rn.insert('korea_recent_news')
     
     @staticmethod
     def get():
-        data = RecentNewsDao.find_all()
+        data = RNewsDao.find_all()
         return data, 200
 
-class Auth(Resource):
-    @staticmethod
-    def post():
-        body = request.get_json()
-        news = NewsDto(**body)
-        RecentNewsDao.save(news)
-        id = news.id
-
-        return {'id': str(id)}, 200
-
-class Access(Resource):
-    
-    @staticmethod
-    def post():
-        args = parser.parse_args()
-        news = NewsVo()
-        news.id = args.id
-        news.headline = args.headline
-        print(news.id)
-        print(news.headline)
-        data = RecentNewsDao.login(news)
-        return data[0], 200
