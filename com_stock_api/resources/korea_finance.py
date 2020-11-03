@@ -104,7 +104,7 @@ class StockDto(db.Model):
     __table_args__ = {'mysql_collate':'utf8_general_ci'}
     
     id: int = db.Column(db.Integer, primary_key = True, index = True)
-    date : str = db.Column(DATETIME)
+    date : str = db.Column(db.String(100))
     open : int = db.Column(db.String(30))
     close : int = db.Column(db.String(30))
     high : int = db.Column(db.String(30))
@@ -179,7 +179,7 @@ class StockDao(StockDto):
             df.to_csv(path + '/'+com+'.csv')
             #df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
             #del df['Unnamed: 0']
-            #print(df.head())            
+            print(df.head())            
             session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
             session.commit()
         session.close()

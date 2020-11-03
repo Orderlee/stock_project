@@ -30,19 +30,17 @@ class NewsDto(db.Model):
 
     id: str = db.Column(db.Integer, primary_key = True, index = True)
     date : str = db.Column(db.DATETIME)
-    headline : str = db.Column(db.String(255))
-    content : str = db.Column(db.Text) #String(10000)
+    headline : str = db.Column(db.Text)
     url :str = db.Column(db.String(500))
     ticker : str = db.Column(db.String(30))
     label : float = db.Column(db.Float)
 
 
     
-    def __init__(self, id, date, headline, content, url, ticker, label):
+    def __init__(self, id, date, headline, url, ticker, label):
         self.id = id
         self.date = date
         self.headline = headline
-        self.content = content
         self.url = url
         self.ticker = ticker
         self.label = label
@@ -50,7 +48,7 @@ class NewsDto(db.Model):
     
     def __repr__(self):
         return f'id={self.id},date={self.date}, headline={self.headline},\
-            content={self.content},url={self.url},ticker={self.ticker},label={self.label}'
+            url={self.url},ticker={self.ticker},label={self.label}'
             
     @property
     def json(self):
@@ -58,7 +56,6 @@ class NewsDto(db.Model):
             'id':self.id,
             'date': self.date,
             'headline':self.headline,
-            'content':self.ccontent,
             'url':self.url,
             'ticker':self.ticker,
             'label':self.label
@@ -68,10 +65,9 @@ class NewsVo:
     id : int = 0
     date: str =''
     headline: str=''
-    content: str=''
     url: str =''
     ticker: str =''
-    label: float =''
+    label: float =0.0
 
 
 Session = openSession()
@@ -95,6 +91,7 @@ class NewsDao(NewsDto):
             input_file = os.path.join(path,file_name)
             df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
             del df['Unnamed: 0']
+            del df['content']
             print(df.head())
             session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
             session.commit()
@@ -169,7 +166,6 @@ parser = reqparse.RequestParser()
 parser.add_argument('id', type=int, required=True, help='This field cannot be left blank')
 parser.add_argument('date', type=str, required=True, help='This field cannot be left blank')
 parser.add_argument('headline', type=str, required=True, help='This field cannot be left blank')
-parser.add_argument('content', type=str, required=True, help='This field cannot be left blank')
 parser.add_argument('url', type=str, required=True, help='This field cannot be left blank')
 parser.add_argument('ticker', type=str, required=True, help='This field cannot be left blank')
 parser.add_argument('label', type=float, required=True, help='This field cannot be left blank')
