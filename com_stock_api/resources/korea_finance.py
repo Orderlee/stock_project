@@ -219,37 +219,18 @@ class StockDao(StockDto):
         return json.loads(df.to_json(orient='records'))
 
 
+        
+
+
     @classmethod
     def find_by_date(cls,date):
         return session.query.filter(StockDto.date.like(date)).one()
 
     @classmethod
-    def find_by_id(cls, open):
-        return session.query.filter(StockDto.open.like(open)).one()
+    def find_by_ticker(cls, tic):
+        return session.query(StockDao).filter((StockDto.ticker.like(tic))).order_by(StockDto.date).all()
 
-    @classmethod
-    def find_by_close(cls,close):
-        return session.query.filter(StockDto.close.like(close)).one()
-    
-    @classmethod
-    def find_by_low(cls,low):
-        return session.query.filter(StockDto.low.like(low)).one()
 
-    @classmethod
-    def find_by_volume(cls,volume):
-        return session.query.filter(StockDto.volume.like(volume)).one()
-
-    @classmethod
-    def find_by_ticker(cls,ticker):
-        return session.query.filter(StockDto.ticker.like(ticker)).all()
-
-    @classmethod
-    def find_by_high(cls,high):
-        return session.query.filter(StockDto.high.like(high)).one()
-
-    @classmethod
-    def find_By_id(cls,id):
-        return session.query.filter(StockDto.id.like(id)).one()
 
 # if __name__ =='__main__':
 #     r=StockDao()
@@ -294,14 +275,16 @@ class Stock(Resource):
         except:
             return {'message': 'An error occured inserting the stock history'}, 500
         return stock.json(), 201
-        
-    def get(self, ticker):
+    
+
+    def get(self,ticker):
         stock = StockDao.find_by_ticker(ticker)
         if stock:
             return stock.json()
         return {'message': 'The stock was not found'}, 404
 
-    def put(self, id):
+
+    def put(self,id):
         data = Stock.parser.parse_args()
         stock = StockDao.find_by_id(id)
 
@@ -309,14 +292,22 @@ class Stock(Resource):
         stock.close = data['close']
         stock.save()
         return stock.json()
+    
+    @staticmethod
+    def delete():
+        args = parser.parse_arges()
+        print(f'Ticker {args["ticker"]} on date {args["date"]} is deleted')
+        StockDao.delete(args['id'])
+        return {'code':0, 'message':'SUCCESS'}, 200
 
 
 class Stocks(Resource):
     def get(self):
-        return {'stock history': list(map(lambda article: article.json(), StockDao.find_all()))}
+        return StockDao.find_all(), 200
     
 
 class lgchem(Resource):
+    
     @staticmethod
     def get():
         print("lgchem get")
@@ -333,6 +324,7 @@ class lgchem(Resource):
         stock = StockVo()
         stock.ticker = args.ticker
         data = StockDao.find_all_by_ticker(stock)
+        #return data.json(), 200
         return data[0], 200
 
 class lginnotek(Resource):
@@ -344,7 +336,7 @@ class lginnotek(Resource):
         stock.ticker = '011070'
         data = StockDao.find_all_by_ticker(stock)
         return data, 200
-
+ 
 
     @staticmethod
     def post():
@@ -353,13 +345,5 @@ class lginnotek(Resource):
         stock = StockVo()
         stock.ticker = args.ticker
         data = StockDao.find_all_by_ticker(stock)
+        #return data.json(), 200
         return data[0], 200
-
-
-
-
-
-
-
-
-

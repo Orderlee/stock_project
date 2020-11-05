@@ -5,15 +5,14 @@ from com_stock_api.ext.routes import initialize_routes
 from com_stock_api.resources.korea_news import NewsDao
 from com_stock_api.resources.korea_covid import KoreaDao
 from com_stock_api.resources.korea_finance import StockDao
-# from com_stock_api.resources.korea_news_recent import RNewsDao
-from com_stock_api.resources.kospi_pred import KospiDao
+from com_stock_api.resources.korea_news_recent import RNewsDao
+# from com_stock_api.resources.kospi_pred import KospiDao
 
 # from com_stock_api.resources.nasdaq_prediction import NasdaqPredictionDao
-# from com_stock_api.resources.uscovid import USCovidDao
-# from com_stock_api.resources.yhfinance import YHFinanceDao
-# from com_stock_api.resources.investingnews import InvestingDao
-# # from com_stock_api.resources.recent_news import RecentNewsDao
-# from com_stock_api.resources.nasdaq_stock import NasdaqStockDao
+from com_stock_api.resources.uscovid import USCovidDao
+from com_stock_api.resources.yhfinance import YHFinanceDao
+from com_stock_api.resources.investingnews import InvestingDao
+from com_stock_api.resources.recent_news import RecentNewsDao
 
 # from com_stock_api.resources.member import MemberDao
 # from com_stock_api.resources.board import BoardDao
@@ -27,7 +26,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, resources={'r/api/*': {"origins":"*"}})
+CORS(app, resources={r'/api/*': {"origins":"*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] =url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -60,19 +59,19 @@ with app.app_context():
         rs = StockDao()
         rs.bulk()
     
-    # recent_news_count = RNewsDao.count()
-    # print(f'******* Recent News Count is {recent_news_count}*****')
-    # if recent_news_count[0] == 0:
-    #     #RNewsDao.bulk()
-    #     rn = RNewsDao()
-    #     rn.bulk()
+    recent_news_count = RNewsDao.count()
+    print(f'******* Recent News Count is {recent_news_count}*****')
+    if recent_news_count[0] == 0:
+        #RNewsDao.bulk()
+        rn = RNewsDao()
+        rn.bulk()
 
-    pred_count = KospiDao.count()
-    print(f'***** Pred Count is {pred_count} *********')
-    if pred_count[0] == 0:
-        #KospiDao.bulk()
-        kp = KospiDao()
-        kp.bulk()
+    # pred_count = KospiDao.count()
+    # print(f'***** Pred Count is {pred_count} *********')
+    # if pred_count[0] == 0:
+    #     #KospiDao.bulk()
+    #     kp = KospiDao()
+    #     kp.bulk()
 
     # count = MemberDao.count()
     # print(f'Members Total Count is {count}')
@@ -89,33 +88,33 @@ with app.app_context():
     # if count == 0:
     #     MemberChurnPredDao.insert_many()
 
-    # count1 = USCovidDao.count()
-    # print(f'US Covid case Total Count is {count1}')
-    # if count1 == 0:
-    #     USCovidDao.bulk()
+    count1 = USCovidDao.count()
+    print(f'US Covid case Total Count is {count1}')
+    if count1[0] == 0:
+        USCovidDao.bulk()
 
-    # count2 = YHFinanceDao.count()
-    # print(f'NASDAQ history data Total Count is {count2}')
-    # if count2 == 0:
-    #     YHFinanceDao.bulk()
+    count2 = YHFinanceDao.count()
+    print(f'NASDAQ history data Total Count is {count2}')
+    if count2[0] == 0:
+        YHFinanceDao.bulk()
 
-    # count3 = InvestingDao.count()
-    # print(f'Stock news Total Count is {count3}')
-    # if count3 == 0:
-    #     InvestingDao.bulk()
 
-    # count4 = RecentNewsDao.count()
-    # print(f'Recent news Total Count is {count4}')
-    # if count4 == 0:
-    #     RecentNewsDao.bulk()
+    count3 = InvestingDao.count()
+    print(f'Stock news Total Count is {count3}')
+    if count3[0] == 0:
+        InvestingDao.bulk()
+
+    count4 = RecentNewsDao.count()
+    print(f'Recent news Total Count is {count4}')
+    if count4[0] == 0:
+        RecentNewsDao.bulk()
 
     # count5 = NasdaqStockDao.count()
     # print(f'NASDAQ Stock Total Count is {count5}')
     # if count5 == 0:
     #     NasdaqStockDao.insert_many()
 
-    
-
+initialize_routes(api)
     
     
     
@@ -129,4 +128,4 @@ with app.app_context():
 def test():
     return{'test':'SUCCESS'}
 
-initialize_routes(api)
+
