@@ -123,10 +123,10 @@ class NewsDao(NewsDto):
         return session.query(NewsDto).filter(NewsDto.ticker.ilike(tic))
 
     @classmethod
-    def find_all_by_ticker(cls, stock):
+    def find_all_by_ticker(cls, lnews):
         sql = cls.query
         df = pd.read_sql(sql.statement, sql.session.bind)
-        df = df[df['ticker'] == stock.ticker]
+        df = df[df['ticker'] == lnews.ticker]
         return json.loads(df.to_json(orient='records'))
     
     @classmethod
@@ -195,23 +195,22 @@ class News(Resource):
     
     @staticmethod
     def get(ticker):
-        args = parser.parse_args()
-        stock = NewsVo()
-        stock.ticker = ticker
-        data = NewsDao.find_all_by_ticker(stock)
-        return data, 200
+        lnews =  NewsDao.find_all_by_ticker(ticker)
+        if lnews:
+            return lnews.json()
+        return {'message': 'The recent lnews was not found'}, 404
 
     def put(self, id):
         data = News.parser.parse_args()
-        stock = NewsDao.find_by_id(id)
+        lnews = NewsDao.find_by_id(id)
 
-        stock.date = data['date']
-        stock.ticker = data['ticker']
-        stock.url = data['url']
-        stock.headline = data['headline']
-        stock.label=data['label']
-        stock.save()
-        return stock.json()
+        lnews.date = data['date']
+        lnews.ticker = data['ticker']
+        lnews.url = data['url']
+        lnews.headline = data['headline']
+        lnews.label=data['label']
+        lnews.save()
+        return lnews.json()
 
 class News_(Resource):
     def get(self):

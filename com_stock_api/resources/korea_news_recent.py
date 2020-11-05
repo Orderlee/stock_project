@@ -138,23 +138,23 @@ class NewsDto(db.Model):
         return f'id={self.id},date={self.date}, headline={self.headline},\
             content={self.content},url={self.url},ticker={self.ticker}'
             
-    @property
+    
     def json(self):
         return {
             'id':self.id,
             'date': self.date,
             'headline':self.headline,
-            'content':self.ccontent,
+            'content':self.content,
             'url':self.url,
             'ticker':self.ticker
         }
 
 class NewsVo:
     id : int = 0
-    date: str =''
-    headline: str=''
-    content: str=''
-    url: str =''
+    date: str = ''
+    headline: str= ''
+    content: str= ''
+    url: str = ''
     ticker: str =''
 
 
@@ -183,7 +183,7 @@ class RNewsDao(NewsDto):
                 com ='lgchem'
             elif com =='lg이노텍':
                 com='lginnotek'
-            file_name = com +'.csv'
+            file_name = com +'_recent_news.csv'
             input_file = os.path.join(path,file_name)
             #df.to_csv(path + '/'+com+'_recent_news.csv',encoding='UTF-8')
             df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
@@ -302,6 +302,7 @@ class RNews(Resource):
     def put(self, id):
         data = RNews.parser.parse_args()
         rnews = RNewsDao.find_by_id(id)
+        print(rnews)
 
         rnews.date = data['date']
         rnews.ticker = data['ticker']
