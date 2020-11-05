@@ -182,38 +182,32 @@ parser.add_argument('label', type=float, required=True, help='This field cannot 
 class News(Resource):
 
     @staticmethod
-    def post():
-        args = parser.parse_args()
-        print(f'News {args["id"]} added')
-        parmas = json.loads(request.get_data(), encoding='utf-8')
-        if len (parmas) == 0:
-            return 'No parameter'
-        
-        params_str=''
-        for key in parmas.keys():
-            params_str += 'key:{}, value:{}<br>'.format(key, parmas[key])
-        return {'code':0, 'message': 'SUCCESS'}, 200
-    
-    @staticmethod
-    def get(id: int):
-        print(f'News {id} added')
+    def post(self):
+        data = self.parser.parse_args()
+        lnews = NewsDto(data['date'],data['headline'],data['content'],data['url'],data['ticker'])
         try:
-            news = NewsDao.find_by_id(id)
-            if news:
-                return news.json()
-        except Exception as e:
-            return {'message': 'Item not found'}, 404
-    @staticmethod
-    def update():
-        args = parser.arse_args()
-        print(f'News {args["id"]} updated')
-        return {'code':0, 'message':'SUCCESS'}, 200
+            lnews.save(data)
+            return {'code':0, 'message':'SUCCESS'},200
+        except:
+            return {'message': 'An error occured inserting recent news'}, 500
+        return lnews.json(), 201
     
-    @staticmethod
-    def delete():
-        args = parser.parse_args()
-        print(f'News {args["id"]} deleted')
-        return {'code':0, 'message':'SUCCESS'}, 200
+    def get(self, ticker):
+        lnews = NewsDao.find_by_ticker(ticker)
+        if lnews:
+            return lnews.json()
+        return {'message': 'The recent news was not found'}, 404
+
+    def put(self, id):
+        data = News.parser.parse_args()
+        lnews = NewsDao.find_by_id(id)
+
+        lnews.date = data['date']
+        lnews.ticker = data['ticker']
+        lnews.url = data['url']
+        lnews.headline = data['headline']
+        lnews.save()
+        return lnews.json()
 
 class News_(Resource):
     def get(self):

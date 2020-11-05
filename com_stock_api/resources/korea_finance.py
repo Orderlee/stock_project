@@ -166,21 +166,21 @@ class StockDao(StockDto):
 
     def bulk(self): 
         path = self.data
-        krs = KoreaStock()
-        krs.new_model()
+        # krs = KoreaStock()
+        # krs.new_model()
         companys = ['lg화학','lg이노텍']
         
         for com in companys:
             print(f'company:{com}')          
-            df = krs.search_stock(com)
+            # df = krs.search_stock(com)
             if com =='lg화학':
                 com ='lgchem'
             elif com =='lg이노텍':
                 com='lginnotek'
-            #file_name = com +'.csv'
-            #input_file = os.path.join(path,file_name)
-            df.to_csv(path + '/'+com+'.csv')
-            #df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
+            file_name = com +'.csv'
+            input_file = os.path.join(path,file_name)
+            # df.to_csv(path + '/'+com+'.csv')
+            df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
             print(df.head())            
             session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
             session.commit()

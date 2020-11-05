@@ -20,7 +20,7 @@ from com_stock_api.resources.yhfinance import YHFinance,YHFinances,AppleGraph,Te
 def initialize_routes(api):
     #api.add_resource(Home,'/kospi')
     api.add_resource(KoreaCovid,'/kospi/koreacovid/<string:id>')
-    api.add_resource(KoreaCovids,'/ksopi/koreacovids')
+    api.add_resource(KoreaCovids,'/kospi/koreacovids')
     api.add_resource(News, '/kospi/news')
     api.add_resource(News_, '/kospi/news_') 
     api.add_resource(lgchem,'/kospi/lgchem')
@@ -29,6 +29,8 @@ def initialize_routes(api):
     api.add_resource(lginnoteknews,'/kospi/lginnoteknews')
     api.add_resource(lgchem_pred, '/kospi/lgchem_pred')
     api.add_resource(lginnotek_pred, '/kospi/lginnotek_pred')
+    api.add_resource(Lgchem_Label, '/kospi/lgchem_label')
+    api.add_resource(Lginnotek_Label, '/kospi/lginnotek_label')
 
 
     # api.add_resource(MemberApi,'/api/memberapi/<string:id>')

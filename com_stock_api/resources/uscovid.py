@@ -143,11 +143,13 @@ class USCovidDao(USCovidDto):
         sql = cls.query
         df = pd.read_sql(sql.statement, sql.session.bind)
         return json.loads(df.to_json(orient='records'))
+
 # =============================================================
 # =============================================================
 # =====================    CONTROLLER    ======================
 # =============================================================
 # =============================================================
+
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int, required=False, help='This field cannot be left blank')
 parser.add_argument('date', type=str, required=False, help='This field cannot be left blank')
@@ -155,6 +157,7 @@ parser.add_argument('total_cases', type=int, required=False, help='This field ca
 parser.add_argument('total_deaths', type=int, required=False, help='This field cannot be left blank')
 parser.add_argument('ca_cases', type=int, required=False, help='This field cannot be left blank')
 parser.add_argument('ca_deaths', type=int, required=False, help='This field cannot be left blank')
+
 class USCovid(Resource):       
     def post(self):
         data = self.parset.parse_args()
@@ -176,6 +179,7 @@ class USCovid(Resource):
         if uscovid:
             return uscovid.json()
         return {'message': 'uscovid not found'}, 404
+    
     def put(self, id):
         data = USCovid.parser.parse_args()
         uscovid = USCovidDao.find_by_id(id)
@@ -186,6 +190,7 @@ class USCovid(Resource):
         uscovid.ca_deaths = data['ca_deaths']
         uscovid.save()
         return uscovid.json()
+
 class USCovids(Resource):
-    def get():
+    def get(self):
         return USCovidDao.find_all(), 200
