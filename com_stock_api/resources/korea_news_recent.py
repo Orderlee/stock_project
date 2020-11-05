@@ -314,7 +314,7 @@ class RNews(Resource):
 
 class RNews_(Resource):
     def get(self):
-        return {'recent news history': list(map(lambda article: article.json(), RNewsDao.find_all()))}
+        return RNewsDao.find_all(),200
     
     # @staticmethod
     # def post():

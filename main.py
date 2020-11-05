@@ -54,7 +54,7 @@ with app.app_context():
     recent_stock_count = StockDao.count()
     print(f'****Stock Count is {recent_stock_count} ****')
     if recent_stock_count[0] == 0:
-        #StockDao.bulk()
+        # StockDao.bulk()
         rs = StockDao()
         rs.bulk()
     

@@ -89,7 +89,7 @@ class KoreaStock():
                 df_result.drop(['up/down', 'pastday'], axis='columns', inplace=True)
                 #df_result['date']=pd.to_datetime(df_result['date'].astype(str), format='%Y/%m/%d')
                 #df_result.set_index('date', inplace=True)
-                time.sleep( random.uniform(2,4) )
+                #time.sleep( random.uniform(2,4) )
         return df_result
                 
 

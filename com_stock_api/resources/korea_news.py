@@ -14,6 +14,7 @@ from pathlib import Path
 from flask import jsonify
 import pandas as pd
 import json
+from matplotlib import pyplot as plt
 
 
 
@@ -116,6 +117,17 @@ class NewsDao(NewsDto):
         data = cls.qeury.get(headline)
         db.session.delete(data)
         db.session.commit()
+
+    @classmethod
+    def find_by_ticker(cls, tic):
+        return session.query(NewsDto).filter(NewsDto.ticker.ilike(tic))
+
+    @classmethod
+    def find_all_by_ticker(cls, rnews):
+        sql = cls.query
+        df = pd.read_sql(sql.statement, sql.session.bind)
+        df = df[df['ticker']== rnews.ticker]
+        return json.loads(df.to_json(orient='records'))
     
     @classmethod
     def find_all(cls):
@@ -143,10 +155,6 @@ class NewsDao(NewsDto):
     @classmethod
     def find_by_url(cls,url):
         return session.query(NewsDto).filter(NewsDto.url.like(url)).one()
-
-    @classmethod
-    def find_by_ticker(cls,ticker):
-        return session.query(NewsDto).filter(NewsDto.ticker.like(ticker)).one()
 
     @classmethod
     def find_by_label(cls,label):
@@ -208,14 +216,86 @@ class News(Resource):
         return {'code':0, 'message':'SUCCESS'}, 200
 
 class News_(Resource):
+    def get(self):
+        return NewsDao.find_all(), 200
     
-    @staticmethod
-    def post():
-        nd = NewsDao()
-        nd.insert('naver_news')
+    # @staticmethod
+    # def post():
+    #     nd = NewsDao()
+    #     nd.insert('naver_news')
     
-    @staticmethod
-    def get():
-        data = NewsDao.find_all()
+    # @staticmethod
+    # def get():
+    #     data = NewsDao.find_all()
+    #     return data, 200
+
+
+class NewsLabel(Resource):
+    
+    @classmethod
+    def lgchem_news(cls):
+        query = NewsDao.find_by_ticker('051910')
+        df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
+        means = df.resample('D', on='date').mean().dropna()
+        print(means)
+        means.insert(0, 'date', means.index)
+        data = json.loads(means.to_json(orient='records'))
+        #print(data)
         return data, 200
 
+    @classmethod
+    def lginnotek_news(cls):
+        query = NewsDao.find_by_ticker('011070')
+        df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
+        means = df.resample('D', on='date').mean().dropna()
+        print(means)
+        means.insert(0, 'date', means.index)
+        data = json.loads(means.to_json(orient='records'))
+        #print(data)
+        return data, 200
+
+
+# class Graph(Resource):
+    
+#     @classmethod
+#     def lgchem_news(cls):
+#         query = NewsDao.find_by_ticker('051910')
+#         df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
+#         means = df.resample('D', on='date').mean().dropna()
+#         means.insert(0, 'date', means.index)
+#         data = json.loads(means.to_json(orient='records'))
+#         #print(data)
+#         return data
+        
+    
+#     @staticmethod
+#     def draw_graph(df):
+
+#         # dates = df.reset_index()['date']
+#         # df.plot(dates, df.reset_index()['pos'], color = 'red', kind="bar")
+#         # plt.title("News Sentiment for Apple")
+#         # plt.xlabel("Date")
+#         # plt.ylabel("Sentiment")
+
+#         # plt.show()
+       
+
+
+#         ax=df.reset_index()["label"].plot.bar(color='red')
+#         # ax1=df.reset_index()["neg"].plot.bar(x=ax, color='blue')
+
+#         ax.set_xticks(df.reset_index()[0::15])
+#         # ax1.set_xticklabels(df.reset_index()[0::15], rotation=45)
+
+#         # ax1.set_ylabel("sentiment score")
+#         # ax1.legend()
+
+#         plt.show()
+
+
+if __name__ == "__main__":
+    r = NewsLabel
+    r.lgchem_news()
+    r.lginnotek_news()
+    # r=Graph()
+    # r.draw_graph()

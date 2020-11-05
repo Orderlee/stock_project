@@ -385,7 +385,6 @@ class TeslaSentiment(Resource):
 
 
 
-
 class InvestingGraph(Resource):
     
     @classmethod

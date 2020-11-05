@@ -1,7 +1,7 @@
 from com_stock_api.resources.korea_covid import KoreaCovid,KoreaCovids
 from com_stock_api.resources.kospi_pred import Kospi,Kospis,lgchem_pred,lginnotek_pred
 from com_stock_api.resources.korea_finance import Stock,Stocks,lgchem,lginnotek
-from com_stock_api.resources.korea_news import News,News_
+from com_stock_api.resources.korea_news import News,News_,NewsLabel
 from com_stock_api.resources.korea_news_recent import RNews,RNews_, lgchemNews,lginnoteknews
 #from com_stock_api.resources.home import Home
 
