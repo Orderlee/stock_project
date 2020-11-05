@@ -77,6 +77,22 @@ session= Session()
 
 
 class KospiDao(KospiDto):
+
+    def __init__(self):
+        self.data = os.path.abspath(__file__+"/.."+"/data/")
+
+    def bulk(self):
+        path = self.data
+        companys = ['lgchem','lginnotek']
+        for com in companys:
+            print(f'company:{com}')
+            file_name = com +'.csv'
+            input_file = os.path.join(path,file_name)
+            df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
+            df = df.iloc[84:206, : ]           
+            session.bulk_insert_mappings(KospiDto, df.to_dict(orient='records'))
+            session.commit()
+        session.close()
     
     @staticmethod
     def count():
