@@ -51,10 +51,10 @@ class Covidedit():
 
         df_all.to_csv(path + '/kor&seoul.csv',encoding='UTF-8')
 
-if __name__ == '__main__':
-    #Covidedit()
-    c=Covidedit()
-    c.csv()
+# if __name__ == '__main__':
+#     #Covidedit()
+#     c=Covidedit()
+#     c.csv()
 
 class KoreaDto(db.Model):
     __tablename__ = 'korea_covid'

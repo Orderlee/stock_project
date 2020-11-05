@@ -6,27 +6,26 @@ from com_stock_api.resources.korea_news import NewsDao
 from com_stock_api.resources.korea_covid import KoreaDao
 from com_stock_api.resources.korea_finance import StockDao
 from com_stock_api.resources.korea_news_recent import RNewsDao
-# from com_stock_api.resources.kospi_pred import KospiDao
+from com_stock_api.resources.kospi_pred import KospiDao
 
-# from com_stock_api.resources.nasdaq_prediction import NasdaqPredictionDao
+from com_stock_api.resources.nasdaq_prediction import NasdaqPredictionDao
 from com_stock_api.resources.uscovid import USCovidDao
 from com_stock_api.resources.yhfinance import YHFinanceDao
 from com_stock_api.resources.investingnews import InvestingDao
 from com_stock_api.resources.recent_news import RecentNewsDao
 
-# from com_stock_api.resources.member import MemberDao
-# from com_stock_api.resources.board import BoardDao
-# from com_stock_api.resources.comment import CommentDao
-# from com_stock_api.resources.member_churn_pred import MemberChurnPredDao
-# from com_stock_api.resources.recommend_stock import RecommendStockDao
-# from com_stock_api.resources.trading import TradingDao
+from com_stock_api.resources.member import MemberDao
+from com_stock_api.resources.board import BoardDao
+from com_stock_api.resources.comment import CommentDao
+from com_stock_api.resources.trading import TradingDao
+from com_stock_api.resources.recommend_stock import RecommendStockDao
 
 
 from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app, resources={r'/api/*': {"origins":"*"}})
+CORS(app, resources={r'/api/*': {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] =url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -66,28 +65,15 @@ with app.app_context():
         rn = RNewsDao()
         rn.bulk()
 
-    # pred_count = KospiDao.count()
-    # print(f'***** Pred Count is {pred_count} *********')
-    # if pred_count[0] == 0:
-    #     #KospiDao.bulk()
-    #     kp = KospiDao()
-    #     kp.bulk()
+    pred_count = KospiDao.count()
+    print(f'***** Pred Count is {pred_count} *********')
+    if pred_count[0] == 0:
+        #KospiDao.bulk()
+        kp = KospiDao()
+        kp.bulk()
 
-    # count = MemberDao.count()
-    # print(f'Members Total Count is {count}')
-    # if count == 0:
-    #     MemberDao.insert_many()
-
-    # count = BoardDao.count()
-    # print(f'Boards Total Count is {count}')
-    # if count == 0:
-    #     BoardDao.insert_many()
-
-    # count = MemberChurnPredDao.count()
-    # print(f'MemberChurnPredictions Total Count is {count}')
-    # if count == 0:
-    #     MemberChurnPredDao.insert_many()
-
+    
+    
     count1 = USCovidDao.count()
     print(f'US Covid case Total Count is {count1}')
     if count1[0] == 0:
@@ -109,10 +95,27 @@ with app.app_context():
     if count4[0] == 0:
         RecentNewsDao.bulk()
 
-    # count5 = NasdaqStockDao.count()
-    # print(f'NASDAQ Stock Total Count is {count5}')
-    # if count5 == 0:
-    #     NasdaqStockDao.insert_many()
+    count5 = NasdaqPredictionDao.count()
+    print(f'NASDAQ Stock Total Count is {count5}')
+    if count5 == 0:
+        NasdaqPredictionDao[0].insert_many()
+
+    
+    
+    count = MemberDao.count()
+    print(f'Members Total Count is {count}')
+    if count == (0,):
+        MemberDao.insert_many()
+
+    count = BoardDao.count()
+    print(f'Boards Total Count is {count}')
+    if count == (0,):
+        BoardDao.insert_many()
+
+    count = TradingDao.count()
+    print(f'Tradings Total Count is {count}')
+    if count == (0,):
+        TradingDao.insert_many()
 
 initialize_routes(api)
     
