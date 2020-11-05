@@ -168,10 +168,12 @@ class USCovid(Resource):
         except:
             return {'message': 'An error occured inserting the covid case'}, 500
         return uscovid.json(), 201
+    
     def get(self):
         print("=====uscovid.py / uscovid's get")
         data = USCovidDao.find_all()
         return data, 200
+    
     @staticmethod
     def fetch(date:str):
         print("=====uscovid.py / uscovid's fetch")

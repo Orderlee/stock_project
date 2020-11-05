@@ -199,9 +199,8 @@ class KoreaCovid(Resource):
     
     def get(self):
         kcovid = KoreaDao.find_all()
-        if kcovid:
-            return kcovid.json()
-        return {'message': 'The recent news was not found'}, 404
+        return kcovid , 200
+
     
     def put(self, id):
         data = KoreaCovid.parser.parse_args()
@@ -214,7 +213,9 @@ class KoreaCovid(Resource):
         kcovid.seoul_deaths = data['seoul_death']
         kcovid.save()
         return kcovid.json()
+
 class KoreaCovids(Resource):
     def get(self):
         return KoreaDao.find_all(), 200
+
 

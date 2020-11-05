@@ -51,7 +51,7 @@ class NewsDto(db.Model):
         return f'id={self.id},date={self.date}, headline={self.headline},\
             url={self.url},ticker={self.ticker},label={self.label}'
             
-    @property
+
     def json(self):
         return {
             'id':self.id,
@@ -123,10 +123,10 @@ class NewsDao(NewsDto):
         return session.query(NewsDto).filter(NewsDto.ticker.ilike(tic))
 
     @classmethod
-    def find_all_by_ticker(cls, rnews):
+    def find_all_by_ticker(cls, stock):
         sql = cls.query
         df = pd.read_sql(sql.statement, sql.session.bind)
-        df = df[df['ticker']== rnews.ticker]
+        df = df[df['ticker'] == stock.ticker]
         return json.loads(df.to_json(orient='records'))
     
     @classmethod
@@ -184,7 +184,7 @@ class News(Resource):
     @staticmethod
     def post(self):
         data = self.parser.parse_args()
-        lnews = NewsDto(data['date'],data['headline'],data['content'],data['url'],data['ticker'])
+        lnews = NewsDto(data['date'],data['headline'],data['content'],data['url'],data['ticker'],data['label'])
         try:
             lnews.save(data)
             return {'code':0, 'message':'SUCCESS'},200
@@ -192,22 +192,26 @@ class News(Resource):
             return {'message': 'An error occured inserting recent news'}, 500
         return lnews.json(), 201
     
-    def get(self, ticker):
-        lnews = NewsDao.find_by_ticker(ticker)
-        if lnews:
-            return lnews.json()
-        return {'message': 'The recent news was not found'}, 404
+    
+    @staticmethod
+    def get(ticker):
+        args = parser.parse_args()
+        stock = NewsVo()
+        stock.ticker = ticker
+        data = NewsDao.find_all_by_ticker(stock)
+        return data, 200
 
     def put(self, id):
         data = News.parser.parse_args()
-        lnews = NewsDao.find_by_id(id)
+        stock = NewsDao.find_by_id(id)
 
-        lnews.date = data['date']
-        lnews.ticker = data['ticker']
-        lnews.url = data['url']
-        lnews.headline = data['headline']
-        lnews.save()
-        return lnews.json()
+        stock.date = data['date']
+        stock.ticker = data['ticker']
+        stock.url = data['url']
+        stock.headline = data['headline']
+        stock.label=data['label']
+        stock.save()
+        return stock.json()
 
 class News_(Resource):
     def get(self):
