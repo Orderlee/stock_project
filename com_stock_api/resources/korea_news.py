@@ -230,10 +230,10 @@ class News_(Resource):
     #     return data, 200
 
 
-class NewsLabel(Resource):
+class Lgchem_Label(Resource):
     
     @classmethod
-    def lgchem_news(cls):
+    def get(cls):
         query = NewsDao.find_by_ticker('051910')
         df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
         means = df.resample('D', on='date').mean().dropna()
@@ -243,8 +243,17 @@ class NewsLabel(Resource):
         #print(data)
         return data, 200
 
+"""
+                   id     label
+date                            
+2020-01-02  691.200000  0.444000
+"""
+
+
+class Lginnotek_Label(Resource):
+    
     @classmethod
-    def lginnotek_news(cls):
+    def get(cls):
         query = NewsDao.find_by_ticker('011070')
         df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
         means = df.resample('D', on='date').mean().dropna()
@@ -255,3 +264,8 @@ class NewsLabel(Resource):
         return data, 200
 
 
+    
+
+# if __name__ =='__main__':
+#     r = Lgchem_Label()
+#     r.get()
