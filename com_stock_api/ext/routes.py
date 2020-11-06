@@ -25,7 +25,7 @@ from com_stock_api.resources.recommend_stock import RecommendStock, RecommendSto
 def initialize_routes(api):
     #api.add_resource(Home,'/kospi')
     api.add_resource(KoreaCovid,'/kospi/koreacovid')
-    api.add_resource(RNews_,'/kospi/rnews')
+
     api.add_resource(lgchemNews,'/kospi/lgchemnews')
     api.add_resource(lginnoteknews,'/kospi/lginnoteknews')
     api.add_resource(Lgchem_Label, '/kospi/lgchem_label')
@@ -39,7 +39,7 @@ def initialize_routes(api):
     
 
 
-    api.add_resource(Home, '/nasdaq')
+    api.add_resource(Home, '/nasdaq') 
     api.add_resource(NasdaqPredictions, '/nasdaq/predictions')
     api.add_resource(ApplePredGraph, '/nasdaq/apple_pred')
     api.add_resource(TeslaPredGraph, '/nasdaq/tesla_pred')
