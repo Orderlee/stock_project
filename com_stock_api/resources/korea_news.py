@@ -15,7 +15,8 @@ from flask import jsonify
 import pandas as pd
 import json
 from matplotlib import pyplot as plt
-
+import csv
+from pathlib import Path
 
 
 # ==============================================================
@@ -231,14 +232,26 @@ class Lgchem_Label(Resource):
     
     @classmethod
     def get(cls):
+        path = os.path.abspath(__file__+"/.."+"/data/")
         query = NewsDao.find_by_ticker('051910')
         df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
         means = df.resample('D', on='date').mean().dropna()
+        print(type(means))
         print(means)
+        # f = open(means, 'r', encoding='UTF-8') 
+        # line = f.readline() 
+        # f.close() 
+        # json_data = json.loads(line) 
+        # data = json_data['data'] 
+        means.to_csv(path+'/lgchem_label.csv', header=True, index=True,encoding='utf-8')
+
+
         means.insert(0, 'date', means.index)
         data = json.loads(means.to_json(orient='records'))
-        #print(data)
+
         return data, 200
+
+
 
 """
                    id     label
@@ -251,18 +264,19 @@ class Lginnotek_Label(Resource):
     
     @classmethod
     def get(cls):
+        path = os.path.abspath(__file__+"/.."+"/data/")
         query = NewsDao.find_by_ticker('011070')
         df = pd.read_sql_query(query.statement, query.session.bind, parse_dates=['date'])
         means = df.resample('D', on='date').mean().dropna()
         print(means)
+        means.to_csv(path+'/lginnotek_label.csv', header=True, index=True,encoding='utf-8')
         means.insert(0, 'date', means.index)
         data = json.loads(means.to_json(orient='records'))
-        #print(data)
         return data, 200
 
 
     
 
 # if __name__ =='__main__':
-#     r = Lgchem_Label()
+#     r = Lginnotek_Label()
 #     r.get()

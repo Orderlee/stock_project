@@ -19,6 +19,7 @@ from sqlalchemy.dialects.mysql import DATE
 import time
 import random
 
+
 # ==============================================================
 # =========================                =====================
 # =========================  Data Mining   =====================
@@ -95,7 +96,7 @@ class KoreaNews():
 
             result= {"date" : date_result, "headline" : title_result, "content" : article_result, "url" : link_result,"ticker":plusUrl.zfill(6)} 
             df_result = pd.DataFrame(result)
-            time.sleep( random.uniform(2,4) )
+            #time.sleep( random.uniform(2,4) )
 
 
 
