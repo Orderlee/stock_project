@@ -50,8 +50,8 @@ from com_stock_api.resources.korea_news import NewsDto
  *     sqlalchemy, flask_restful
  * @ 수정일         수정자                      수정내용
  *   ------------------------------------------------------------------------
- *   2020.11.01     이영우      1
- *   2020.11.01     이영우      
+ *   2020.11.10     이영우      주식정보와 코로나 상관분석 추가
+ *   2020.11.10     이영우      주식데이터 학습 추가
  *   2020.11.02     이영우      
 """
 
@@ -71,13 +71,13 @@ class TotalDF():
         self.path = os.path.abspath(__file__+"/.."+"/data")
         self.fileReader = FileReader()
         self.df = None
-        self.ticker=''
+        #self.ticker = ''
         self.tickers = ['051910','011070']
 
     def hook(self):
         for tic in self.tickers:
             self.ticker = tic
-            df = self.dataframe()
+            self.dataframe()
             self.scatter()
             self.heatmap_graph()
             
@@ -92,38 +92,27 @@ class TotalDF():
         df = df.loc[(df['ticker'] == self.ticker) & (df['date']>'2019-12-31') & (df['date'] <'2020-07-01')]
         df['date'] = pd.to_datetime(df['date'])
         df = df.drop(['ticker','id'],axis= 1)
+        df = df[df['date'].notnull() == True].set_index('date')
         # print(df)
-
-        temp_df = pd.DataFrame()
-        df2 = pd.read_sql_table('korea_finance', engine.connect())
-        korea_tickers ={'lg_chem':'051910','lg_innotek':'011070'}
         
-        for k_tic,v in korea_tickers.items():
-            df2 = pd.read_sql_table('korea_finance',engine.connect())
-            #df2['date'] = pd.to_datetime(df2['date'])
-            # print(df2)
-            df2 = df2.loc[(df2['ticker'] == v) & (df2['date'] > '2019-12-31') & (df2['date']<'2020-07-01')]
-            df2 = df2.rename(columns={'open':k_tic + '_open', 'close':k_tic + '_close','high':k_tic+'_high','low':k_tic+'_low'})
-            df2 = df2.drop(['id','ticker','volume'], axis=1)
-            df2 = df2[df2['date'].notnull() == True].set_index('date')
+        # korea_tickers ={'lg_innotek':'011070','lg_chem':'051910'}
+        tic = [t for t in self.tickers if t != self.ticker]
+        #for k_tic,v in korea_tickers.items():
+        #print(tic)
+        df2 = pd.read_sql_table('korea_finance',engine.connect())
+        df2 = df2.loc[(df2['ticker'] == tic[0]) & (df2['date'] > '2019-12-31') & (df2['date']<'2020-07-01')]
+        df2 = df2.rename(columns={'open':tic[0] + '_open', 'close':tic[0] + '_close','high':tic[0]+'_high','low':tic[0]+'_low'})
+        df2 = df2.drop(['id','ticker','volume'], axis=1)
+        df2 = df2[df2['date'].notnull() == True].set_index('date')
 
-            temp_df = temp_df.join(df2, how='outer')
-        
-        temp_df['date'] = temp_df.index
-        #print(temp_df)
+
 
         covid_json = json.dumps(KoreaCovids.get()[0], default = lambda x: x.__dict__)
         df3 = pd.read_json(covid_json)
         df3 = df3.loc[(df3['date'] > '2019-12-31') & (df3['date']<'2020-07-01')]
         df3 = df3.drop(['id','total_cases','total_deaths','seoul_cases','seoul_deaths'],axis=1)
-
-        temp_df = temp_df[temp_df['date'].notnull()==True].set_index('date')
         df3 = df3[df3['date'].notnull() == True].set_index('date')
-       
-        df = df[df['date'].notnull() == True].set_index('date')
-        #print(main_df)
-        
-        
+
         
         
         main_df = df.join(df2, how='outer')
@@ -136,35 +125,24 @@ class TotalDF():
         print(main_df)
         print(main_df.columns)
 
-        # if self.ticker =='051910':
-        #     self.ticker ='lgchem'
-        # elif self.ticker =='011070':
-        #     self.ticker = 'lginnotek'
-        
+
         output_file = self.ticker + '_dataset.csv'
         result = os.path.join(self.path, output_file)
         main_df.to_csv(result)
         return main_df
     
     def scatter(self):
-        if self.ticker =='051910':
-            self.ticker ='lgchem'
-        elif self.ticker =='011070':
-            self.ticker = 'lginnotek'
 
         path = os.path.abspath(__file__+"/../"+"/image")
         company = self.ticker +"_dataset.csv"
         input_file = os.path.join(self.path, company)
 
         df = pd.read_csv(input_file)
-        df.drop(['date'], axis=1)
-        tic = [t for t in self.tickers if t !=self.ticker]
-        op_tic = tic[0]
-        
+        df.drop(['date'], axis=1)   
 
         sns.pairplot(df, height = 2.5)
         plt.tight_layout()
-        plt.title("The Scatter Plot of" + self.ticker)
+        plt.title("The Scatter Plot of " + self.ticker)
         file_name = self.ticker + "_correlation.png"
         output_file = os.path.join(path, file_name)
         plt.savefig(output_file)
@@ -172,26 +150,18 @@ class TotalDF():
 
     def heatmap_graph(self):
         
-        if self.tickers =='051910':
-            self.tickers ='lgchem'
-        elif self.tickers =='011070':
-            self.tickers = 'lginnotek'        
-
         path = os.path.abspath(__file__+"/../"+"/image")
-
-
-        filen = self.ticker + "_dataset.csv"
-        input_file = os.path.join(self.path, filen)
+        company = self.ticker + "_dataset.csv"
+        input_file = os.path.join(self.path, company)
+        
         df = pd.read_csv(input_file, header=0)
         df.drop(['date'], axis=1, inplace=True)
-        print(df.columns)
-        tic = [t for t in self.tickers if t !=self.ticker]
-        op_tic = tic[0]
+        #print(df.columns)
 
         sns.heatmap(df)
         plt.title('Heatmap of ' + self.ticker, fontsize=20)
 
-        company = self.ticker + "_dataset.csv"
+        
         file_name2 = self.ticker + "_heatmap.png"
         output_file2 = os.path.join(path,file_name2)
         plt.savefig(output_file2)
@@ -479,14 +449,18 @@ class StockService():
     # y_test: object = None
     # model: object = None
 
+  
+
     def __init__(self):
         self.reader = FileReader()
         self.data = os.path.abspath(__file__+"/.."+"/data/")
-        self.ticker =''
-        self.ticker=['051910','011070']
+        self.ticker=''
+        self.tickers = ['051910','011070']
 
     
     def hook(self):
+        for tic in self.tickers:
+            self.ticker = tic
         self.get_data()
         # self.dataprocessing()
         #self.create_model()
@@ -495,17 +469,20 @@ class StockService():
     
     def get_data(self):
         df = pd.read_sql_table('korea_finance', engine.connect())
+        df = df.loc[(df['ticker'] == self.ticker)]
+        #print(df)
         #df =df.loc[(df['ticker'] == self.ticker) & (df['date']>'2016-10-29') & (df['date'] <'2020-07-01')]
         # df = data.to_numpy()
         
 
-        # table_col = data.shape[1]
-        # y_col = 1
-        # x_col = table_col - y_col
+        table_col = df.shape[1]
+        print(df.shape[1])
+        y_col = 1
+        x_col = table_col - y_col
 
-        num_shape = 1500
-        train = df[:num_shape,2:3]
-        test = df[num_shape:, 2:3]
+        num_shape = 800
+        train = df[:num_shape][["open"]]
+        test = df[num_shape:][["close"]]
         # x_train, x_test, y_train,y_test =train_test_split(x,y, test_size = 0.4) 
         # x_test, x_validation, y_test, y_validation =train_test_split(x_test,y_test, test_size=0.4)
 
@@ -572,11 +549,11 @@ class StockService():
 
 
 
-        checkpoint_path = os.path.join(path, 'lgchem_train', 'lgchem.ckpt')
+        checkpoint_path = os.path.join(path, self.ticker + '_train', self.ticker + '.ckpt')
         cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
         model.compile(optimizer = 'adam', loss = 'mean_squared_error')
-        hist = model.fit(X_train, y_train, epochs = 10,callbacks=[cp_callback], batch_size = 32)
-        model.save(os.path.join(path, 'lgchem_pred.h5'))
+        hist = model.fit(X_train, y_train, epochs = 1,callbacks=[cp_callback], batch_size = 32)
+        model.save(os.path.join(path, self.ticker + '_pred.h5'))
 
         #print("loss:"+ str(hist.history['loss']))
 
@@ -607,8 +584,8 @@ class StockService():
         print('[ predict ] ',predict.shape)
         #print(df['date'][:])
         
-        # print(f'type: {type(predict)}, value: {predict[:]}')
-        # print(f'type: {type(test)}, value: {test[:]}')
+        print(f'type: {type(predict)}, value: {predict[:]}')
+        print(f'type: {type(test)}, value: {test[:]}')
         print('======================')
         '''
         [ test ]  (290, 1)
@@ -619,7 +596,7 @@ class StockService():
         '''
         
         
-        diff = predict - test
+        diff = predict - test.astype(float)
 
         print("MSE:", np.mean(diff**2))
         print("MAE:", np.mean(abs(diff)))
@@ -676,15 +653,25 @@ class StockService():
         
         df_date = df_date.reset_index(drop=True)
 
-        plt.figure(figsize=(20,7))
-        plt.plot(df['date'].values[:], df_volume[:], color = 'red', label = 'Real lgchem Stock Price')
-        plt.plot(df_date['date'][-prediction_full_new.shape[0]:].values, prediction_full_new, color = 'blue', label = 'Predicted lgchem Stock Price')
-        plt.xticks(np.arange(1000,df[:].shape[0],1500))
-        plt.title('lgchem Stock Price Prediction')
-        plt.xlabel('date')
-        plt.ylabel('Price (₩)')
-        plt.legend() 
-        plt.show()
+        d =df['date'].values[:]
+        d.reshape(-1,990)
+        print(d.shape)
+        print(d)
+        # print(type(df['date'].values[:]))
+        # c =df_volume
+        # print(c.shape)
+        # print(df_volume)
+        # print(type(df_volume))
+
+        # plt.figure(figsize=(20,7))
+        # plt.plot(d, df_volume[:], color = 'red', label = 'Real lgchem Stock Price')
+        # plt.plot(df_date['date'][-prediction_full_new.shape[0]:].values, prediction_full_new, color = 'blue', label = 'Predicted lgchem Stock Price')
+        # plt.xticks(np.arange(1000,df[:].shape[0],1500))
+        # plt.title('lgchem Stock Price Prediction')
+        # plt.xlabel('date')
+        # plt.ylabel('Price (₩)')
+        # plt.legend() 
+        # plt.show()
 
         
 

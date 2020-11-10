@@ -176,7 +176,7 @@ class StockDao(StockDto):
             if com =='lg화학':
                 com ='lgchem'
             elif com =='lg이노텍':
-                com='lginnotek'
+                com ='lginnotek'
             file_name = com +'.csv'
             input_file = os.path.join(path,file_name)
             #df.to_csv(path + '/'+com+'.csv')
