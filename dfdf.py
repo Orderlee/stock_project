@@ -388,6 +388,60 @@ class lginnotek(Resource):
 
 
 
+def __init__(self):
+        self.path = os.path.abspath(__file__+"/.."+"/data")
+        self.fileReader = FileReader()
+        self.df = None
+        self.ticker=''
+        self.tickers = ['051910','011070']
 
+    def hook(self):
+        for tic in self.tickers:
+            self.ticker = tic
+            df = self.dataframe()
+            self.scatter()
+            self.heatmap_graph()
+            
+        
+    '''
+    columns=,date,close,open,high,low,volume,ticker
+    '''
+    def dataframe(self):
+        main_df = self.df
+
+        df = pd.read_sql_table('korea_finance', engine.connect())
+        df = df.loc[(df['ticker'] == self.ticker) & (df['date']>'2019-12-31') & (df['date'] <'2020-07-01')]
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.drop(['ticker','id'],axis= 1)
+        # print(df)
+
+        temp_df = pd.DataFrame()
+        df2 = pd.read_sql_table('korea_finance', engine.connect())
+        korea_tickers ={'lg_chem':'051910','lg_innotek':'011070'}
+        
+        for k_tic,v in korea_tickers.items():
+            df2 = pd.read_sql_table('korea_finance',engine.connect())
+            #df2['date'] = pd.to_datetime(df2['date'])
+            # print(df2)
+            df2 = df2.loc[(df2['ticker'] == v) & (df2['date'] > '2019-12-31') & (df2['date']<'2020-07-01')]
+            df2 = df2.rename(columns={'open':k_tic + '_open', 'close':k_tic + '_close','high':k_tic+'_high','low':k_tic+'_low'})
+            df2 = df2.drop(['id','ticker','volume'], axis=1)
+            df2 = df2[df2['date'].notnull() == True].set_index('date')
+
+            temp_df = temp_df.join(df2, how='outer')
+        
+        temp_df['date'] = temp_df.index
+        #print(temp_df)
+
+        covid_json = json.dumps(KoreaCovids.get()[0], default = lambda x: x.__dict__)
+        df3 = pd.read_json(covid_json)
+        df3 = df3.loc[(df3['date'] > '2019-12-31') & (df3['date']<'2020-07-01')]
+        df3 = df3.drop(['id','total_cases','total_deaths','seoul_cases','seoul_deaths'],axis=1)
+
+        temp_df = temp_df[temp_df['date'].notnull()==True].set_index('date')
+        df3 = df3[df3['date'].notnull() == True].set_index('date')
+       
+        df = df[df['date'].notnull() == True].set_index('date')
+        #print(main_df)
 
 

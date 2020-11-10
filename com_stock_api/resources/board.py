@@ -57,7 +57,7 @@ class BoardPro:
         return data
 
     def get_data(self):
-        self.reader.context = os.path.join(self.datapath, 'data')
+        self.reader.context = os.path.join(self.datapath, 'data/')
         self.reader.fname = 'kyobo_notice.csv'
         notice_file = self.reader.csv_to_dframe()
         return notice_file
@@ -81,7 +81,7 @@ class BoardPro:
         return data
 
     def save_data(self, data):
-        self.reader.context = os.path.join(self.datapath, 'saved_data')
+        self.reader.context = os.path.join(self.datapath, 'saved_data/')
         self.reader.fname = 'kyobo_notice_database.csv'
         data.to_csv(self.reader.new_file(), index=False)
         print('file saved')
