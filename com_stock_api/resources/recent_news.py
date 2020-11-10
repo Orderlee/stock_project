@@ -174,7 +174,7 @@ class RecentNewsPro:
 # =============================================================
 
 class RecentNewsDto(db.Model):
-    __tablename__ = 'Recent_News'
+    __tablename__ = 'US_Recent_News'
     __table_args__={'mysql_collate':'utf8_general_ci'}
     id: int = db.Column(db.Integer, primary_key = True, index = True)
     date: str = db.Column(db.Date)
@@ -196,7 +196,7 @@ class RecentNewsDto(db.Model):
         self.content = content
 
     def __repr__(self):
-        return f'RecentNews(id=\'{self.id}\', date=\'{self.date}\', time=\'{self.time}\',\
+        return f'US_RecentNews(id=\'{self.id}\', date=\'{self.date}\', time=\'{self.time}\',\
             ticker=\'{self.ticker}\',link=\'{self.link}\', headline=\'{self.headline}\'\
                 image=\'{self.image}\', content=\'{self.content}\')'
 
@@ -238,25 +238,27 @@ class RecentNewsDao(RecentNewsDto):
 
     @staticmethod   
     def bulk():
-        # service = RecentNewsPro()
-        # dfs = service.hook()
-        # for i in dfs:
-        #     print(i.head())
-        #     session.bulk_insert_mappings(RecentNewsDto, i.to_dict(orient="records"))
-        #     session.commit()
-        # session.close()
-
-        tickers = ['AAPL', 'TSLA']
-        for tic in tickers:
-            path = os.path.abspath(__file__+"/.."+"/saved_data/")
-            file_name = tic + '_recent_news.csv'
-            input_file = os.path.join(path,file_name)
-
-            df = pd.read_csv(input_file)
-            print(df.head())
-            session.bulk_insert_mappings(RecentNewsDto, df.to_dict(orient="records"))
+        #1. When you want to refresh data
+        service = RecentNewsPro()
+        dfs = service.hook()
+        for i in dfs:
+            print(i.head())
+            session.bulk_insert_mappings(RecentNewsDto, i.to_dict(orient="records"))
             session.commit()
         session.close()
+
+        #2. When you already saved the most recent data
+        # tickers = ['AAPL', 'TSLA']
+        # for tic in tickers:
+        #     path = os.path.abspath(__file__+"/.."+"/saved_data/")
+        #     file_name = tic + '_recent_news.csv'
+        #     input_file = os.path.join(path,file_name)
+
+        #     df = pd.read_csv(input_file)
+        #     print(df.head())
+        #     session.bulk_insert_mappings(RecentNewsDto, df.to_dict(orient="records"))
+        #     session.commit()
+        # session.close()
 
     @staticmethod
     def save(news):

@@ -8,6 +8,7 @@ from com_stock_api.resources.korea_finance import StockDao
 from com_stock_api.resources.korea_news_recent import RNewsDao
 from com_stock_api.resources.kospi_pred import KospiDao
 
+
 from com_stock_api.resources.nasdaq_prediction import NasdaqPredictionDao
 from com_stock_api.resources.uscovid import USCovidDao
 from com_stock_api.resources.yhfinance import YHFinanceDao

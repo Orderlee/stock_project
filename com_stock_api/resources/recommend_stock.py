@@ -12,6 +12,9 @@ import numpy as np
 import math
 import operator
 
+import os
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 '''
@@ -132,15 +135,188 @@ class RecommendStockPreprocessing():
 
 
 
+# class RecommendStockModel():
+    
+#     def __init__(self):
+#         self.path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models', 'recommend_stock')
+
+#         self._this_mem = tf.placeholder(tf.float32, name='this_member')
+#         self._target_mem = tf.placeholder(tf.float32, name='target_member')
+#         self._feed_dict = {}
+    
+#     def hook(self):
+#         self.substitute()
+        
+#     def substitute(self):
+#         members = pd.read_sql_table('members', engine.connect())
+#         preprocessing = RecommendStockPreprocessing()
+#         refined_members = preprocessing.hook_process(members)
+        
+#         isExitedMem = refined_members[refined_members['exited']==1].index
+#         refined_members = refined_members.drop(isExitedMem)
+#         print(f'REFINED MEMBERS: \n{refined_members}')
+
+#         refined_members.set_index(refined_members['email'], inplace=True)
+#         refined_members = refined_members.drop(['email'], axis=1)
+#         print(f'REFINED MEMBERS AFTER EMAIL INDEXING: \n{refined_members}')
+
+#         base_columns = refined_members.columns
+
+#         for email in refined_members.index:
+
+#             this_member = pd.DataFrame(refined_members.loc[email, base_columns]).T
+#             else_members = refined_members.loc[:, base_columns].drop(email, axis=0)
+
+#             for mem in else_members.index:
+
+#                 self._feed_dict = {'this_member': this_member.loc[email, base_columns], 'target_member': else_members.loc[mem, base_columns]}
+#                 self.create_similarity_model()
+
+#             #     if mem == '15565806@gmail.com': break
+            
+#             # if mem == '15565806@gmail.com': break
+          
+#     def create_similarity_model(self):
+#         this = self._this_mem
+#         target = self._target_mem
+#         feed_dict = self._feed_dict
+
+#         _main_norm = tf.norm(this, name='this_norm')
+#         _row_norm = tf.norm(target, name='target_norm')
+
+#         expr_dot = tf.tensordot(this, target, 1, name='member_dot')
+#         expr_div = tf.divide(this, target, name='member_div')
+
+#         with tf.Session() as sess:
+#             _ = tf.Variable(initial_value='fake_variable')
+#             sess.run(tf.global_variables_initializer())
+
+#             main_m = sess.run(_main_norm, {this: feed_dict['this_member']})
+#             row_mem = sess.run(_row_norm, {target: feed_dict['target_member']})
+#             print(f'main_m: {main_m}')
+#             print(f'row_mem: {row_mem}')
+
+#             prod = sess.run(expr_dot, {this: feed_dict['this_member'], target: feed_dict['target_member']})
+#             print(f'PROD: {prod}')
+#             similarity = sess.run(expr_div, {this: prod, target: (main_m*row_mem)})
+#             print(f'SIMILARITY: {similarity}')
+            
+#             checkpoint_path = os.path.join(self.path, 'recommend_stock_checkpoint', 'similarity.ckpt')
+#             saver = tf.train.Saver()
+#             saver.save(sess, checkpoint_path, global_step=1000)
+
+
+# if __name__ == '__main__':
+#     rsmodel = RecommendStockModel()
+#     rsmodel.hook()
+            
+
+
+
+
+# class RecommendSpeedTestService():
+
+#     def __init__(self, member):
+#         self.path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models', 'recommend_stock')
+#         self._member = member
+
+#     # def assign(self, member):
+#     #     self._member = member
+
+#     def hook(self):
+#         sim_dict = self.similarity_calc()
+#         recommend_stock_list = self.recommend(sim_dict)
+#         print(recommend_stock_list)
+
+#     def similarity_calc(self):
+#         m = self._member
+#         print(f'MEMBER: \n{m}')
+
+#         members = pd.read_sql_table('members', engine.connect())
+#         preprocessing = RecommendStockPreprocessing()
+#         refined_members = preprocessing.hook_process(members)
+        
+#         isExitedMem = refined_members[refined_members['exited']==1].index
+#         refined_members = refined_members.drop(isExitedMem)
+#         print(f'REFINED MEMBERS: \n{refined_members}')
+
+#         refined_members.set_index(refined_members['email'], inplace=True)
+#         refined_members = refined_members.drop(['email'], axis=1)
+#         print(f'REFINED MEMBERS AFTER EMAIL INDEXING: \n{refined_members}')
+
+#         base_columns = refined_members.columns
+
+#         this_member = pd.DataFrame(refined_members.loc[m['email'], base_columns]).T
+#         else_members = refined_members.loc[:, base_columns].drop(m['email'], axis=0)
+
+#         sim_dict = {}
+
+#         for mem in else_members.index:
+#             with tf.Session() as sess:
+#                 saver = tf.train.import_meta_graph(os.path.join(self.path, 'recommend_stock_checkpoint', 'cp.ckpt-1000.meta'))
+#                 saver.restore(sess, tf.train.latest_checkpoint(os.path.join(self.path, 'recommend_stock_checkpoint/')))
+
+#                 graph = tf.get_default_graph()
+#                 this = graph.get_tensor_by_name('this_member:0')
+#                 target = graph.get_tensor_by_name('target_member:0')
+#                 feed_dict = {'this_member': this_member.loc[m['email'], base_columns], 'target_member': else_members.loc[mem, base_columns]}
+
+#                 # _main_norm = graph.get_tensor_by_name('this_norm:0')
+#                 # _row_norm = graph.get_tensor_by_name('target_norm:0')
+#                 _main_norm = tf.norm(this, name='this_norm')
+#                 _row_norm = tf.norm(target, name='target_norm')
+#                 expr_dot = graph.get_tensor_by_name('member_dot:0')
+#                 expr_div = graph.get_tensor_by_name('member_div:0')
+
+#                 main_m = sess.run(_main_norm, {this: feed_dict['this_member']})
+#                 row_mem = sess.run(_row_norm, {target: feed_dict['target_member']})
+#                 # print(f'main_m: {main_m}')
+#                 # print(f'row_mem: {row_mem}')
+#                 prod = sess.run(expr_dot, {this: feed_dict['this_member'], target: feed_dict['target_member']})
+#                 # print(f'PROD: {prod}')
+#                 similarity = sess.run(expr_div, {this: prod, target: (main_m*row_mem)})
+
+#                 sim_dict[mem] = similarity
+
+#         return sim_dict
+
+#     def recommend(self, sim_dict):
+#         m = self._member
+#         sim_members = sorted(sim_dict.items(), key=operator.itemgetter(1), reverse=True)[:50]
+
+#         tradings = pd.read_sql_table('tradings', engine.connect())
+#         this_members_tradings = list(tradings[tradings['email'] == m['email']]['stock_ticker'])
+
+#         match_tradings = pd.DataFrame(columns=('id', 'email', 'stock_type', 'stock_ticker', 'stock_qty', 'price', 'trading_date'))
+#         for mem, prob in sim_members:
+#             match_tradings = pd.concat([match_tradings, tradings[tradings['email'] == mem]])
+#         stocks_size = list(match_tradings.groupby('stock_ticker').size().sort_values(ascending=False).index)
+#         stocks_list = [{'stock_ticker':s, 
+#         'stock_type': str(match_tradings[match_tradings['stock_ticker'] == s]['stock_type'].unique()[0]),
+#         'email': m.email} for s in stocks_size if s not in this_members_tradings]
+#         return stocks_list
+
+# # if __name__ == '__main__':
+# #     member = {'email': '15721779@gmail.com', 'password': '1234', 'name': 'Arnold', 'profile': 'noimage.png', 'geography': 'Spain',
+# #     'gender': 'Male', 'age': 41, 'tenure': 5, 'stock_qty': 2, 'balance': 146466, 'has_credit': 0, 'credit_score': 826, 'is_active_member': 0, 
+# #     'estimated_salary': 180935, 'role': 'ROLE_USER', 'probability_churn': 0.275768, 'exited': 0}
+# #     model = RecommendSpeedTestService(member)
+# #     model.hook()
+
+from scipy.spatial.distance import pdist, squareform
+        
 class RecommendStocksWithSimilarity():
 
     def hook_process(self, email):
         print('START')
         similarity = self.similarity(email)
-        print(f'get similarity complete')
-        sim_members = self.sortHundred(similarity)
+        # print(f'get similarity complete')
+        sim_members = self.sortFifty(similarity)
+        print([mem for mem, sim in sim_members])
         match_tradings = self.similarMembersTradings(sim_members, email)
         print(f'match_tradings: \n{match_tradings}')
+        # return pd.DataFrame(match_tradings)
+        return [mem for mem, sim in sim_members]
 
     @staticmethod
     def similarity(email):
@@ -150,29 +326,30 @@ class RecommendStocksWithSimilarity():
         
         isExitedMem = refined_members[refined_members['exited']==1].index
         refined_members = refined_members.drop(isExitedMem)
+        isZeroBalMem = refined_members[refined_members['balance']==0].index
+        refined_members = refined_members.drop(isZeroBalMem)
+        print(len(refined_members))
 
         refined_members.set_index(refined_members['email'], inplace=True)
         refined_members = refined_members.drop(['email'], axis=1)
+        print(f'REFINED MEMBERS: \n{refined_members}')
 
+        base_index = refined_members.index
         base_columns = refined_members.columns
 
-        this_member = pd.DataFrame(refined_members.loc[email, base_columns]).T
-        else_members = refined_members.loc[:, base_columns].drop(email, axis=0)
+        row_dist = pd.DataFrame(squareform(
+            pdist(refined_members, metric='euclidean')), columns=base_index, index=base_index)
+        # print(f'ROWDIST: \n {row_dist}')
 
-        col_list = list(this_member.columns)
-        sim_dict = {}
+        this_mem = row_dist[row_dist.index == email]
+        this_mem = this_mem.reset_index(drop=True)
+        # print(this_mem.to_dict(orient='records'))
 
-        for mem in else_members.index:
-            main_n = np.linalg.norm(this_member.loc[email, base_columns])
-            row_mem = np.linalg.norm(else_members.loc[mem, base_columns])
-            prod = np.dot(this_member.loc[email, base_columns], else_members.loc[mem, base_columns])
-            sim_dict[mem] = prod/(main_n*row_mem)
-
-        return sim_dict
+        return this_mem.to_dict(orient='records')[-1]
 
     @staticmethod
-    def sortHundred(sim_dict):
-        sim_members = sorted(sim_dict.items(), key=operator.itemgetter(1), reverse=True)[:50]
+    def sortFifty(sim_dict):
+        sim_members = sorted(sim_dict.items(), key=operator.itemgetter(1), reverse=False)[1:50]
         return sim_members
 
     @staticmethod
@@ -184,14 +361,16 @@ class RecommendStocksWithSimilarity():
         for mem, prob in sim_members:
             match_tradings = pd.concat([match_tradings, tradings[tradings['email'] == mem]])
         stocks_size = list(match_tradings.groupby('stock_ticker').size().sort_values(ascending=False).index)
-        stocks_list = [s for s in stocks_size if s not in this_members_tradings]
+        stocks_list = [{'stock_ticker':s, 
+        'stock_type': str(match_tradings[match_tradings['stock_ticker'] == s]['stock_type'].unique()[0]),
+        'email': email} for s in stocks_size if s not in this_members_tradings]
         return stocks_list
 
 
 if __name__ == '__main__':
     rs = RecommendStocksWithSimilarity()
     rs.hook_process(email='15660679@gmail.com')
-    
+
 
 
 
@@ -258,14 +437,13 @@ class RecommendStockDao(RecommendStockDto):
         df = pd.read_sql(sql.statement, sql.session.bind)
         print(json.loads(df.to_json(orient='records')))
         return json.loads(df.to_json(orient='records'))
-
+    
     @classmethod
-    def find_by_email(cls, email):
+    def find_by_id(cls, email):
         sql = cls.query.filter(cls.email == email)
         df = pd.read_sql(sql.statement, sql.session.bind)
         print(json.loads(df.to_json(orient='records')))
         return json.loads(df.to_json(orient='records'))
-
 
     @staticmethod
     def save(recommend_stock):
@@ -356,7 +534,8 @@ class RecommendStocks(Resource):
         rs_dao = RecommendStockDao()
         rs_dao.insert_many('recommend_stocks')
 
-    def get(self):
-        data = RecommendStockDao.find_all()
+    @staticmethod
+    def get(email):
+        data = RecommendStockDao.find_by_email(email)
         return data, 200
 
