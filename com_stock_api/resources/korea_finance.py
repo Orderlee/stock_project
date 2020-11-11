@@ -19,6 +19,22 @@ from sqlalchemy.dialects.mysql import DATE,DATETIME
 import time
 import random
 
+"""
+ * @ Module Name : korea_finance.py
+ * @ Description : finance
+ * @ since 2020.10.15
+ * @ version 1.0
+ * @ Modification Information
+ * @ author 이영우
+ * @ special reference libraries
+ *     sqlalchemy, flask_restful
+ * @ 수정일         수정자                      수정내용
+ *   ------------------------------------------------------------------------
+ *   2020.11.10     이영우      
+ *   2020.11.10     이영우      
+ *   2020.11.02     이영우      
+"""
+
 
 # ==============================================================
 # =========================                =====================
@@ -165,21 +181,34 @@ class StockDao(StockDto):
 
 
     def bulk(self): 
-        path = self.data
-        #krs = KoreaStock()
-        #krs.new_model()
-        companys = ['lg화학','lg이노텍']
         
+        path = self.data
+        companys = ['lg화학','lg이노텍']
+        #1.최근 데이터 저장 후 커밋
+        # krs = KoreaStock()
+        # krs.new_model()
+        # for com in companys:
+        #     print(f'company:{com}')          
+        #     df = krs.search_stock(com)
+        #     if com =='lg화학':
+        #         com ='lgchem'
+        #     elif com =='lg이노텍':
+        #         com ='lginnotek'
+        #     df.to_csv(path + '/'+com+'.csv')
+        #     print(df.head())            
+        #     session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))
+        #     session.commit()
+        # session.close()
+
+        #2.이미 저장된 데이터 커밋        
         for com in companys:
             print(f'company:{com}')          
-            #df = krs.search_stock(com)
             if com =='lg화학':
                 com ='lgchem'
             elif com =='lg이노텍':
                 com ='lginnotek'
             file_name = com +'.csv'
             input_file = os.path.join(path,file_name)
-            #df.to_csv(path + '/'+com+'.csv')
             df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
             print(df.head())            
             session.bulk_insert_mappings(StockDto, df.to_dict(orient='records'))

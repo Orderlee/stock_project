@@ -67,7 +67,7 @@ class TradingPro:
     def get_data(self):
         members = pd.read_sql_table('members', engine.connect())
         kospis = pd.read_sql_table('korea_finance', engine.connect())
-        nasdaqs = pd.read_sql_table('Yahoo_Finance', engine.connect())
+        nasdaqs = pd.read_sql_table('yahoo_finance', engine.connect())
         
         # kospi의 금액을 모두 20201030 현재 환율 1129.16으로 나눔
         kospis['open'] = [round(float(k)/1129.16, 4) for k in kospis['open']]
@@ -459,7 +459,7 @@ class TradingVo:
     stock_ticker: int = 0
     stock_qty: int = 0
     price: float = 0.0
-    trading_date: str = db.Column(db.String(1000), default=datetime.datetime.now())
+    trading_date: datetime = datetime.datetime.now()
 
 
 
@@ -531,7 +531,7 @@ class TradingDao(TradingDto):
         Session = openSession()
         session = Session()
         trading = session.query(TradingDto)\
-        .filter(TradingDto.id==trading.id)\
+        .filter(TradingDto.id==trading['id'])\
         .update({TradingDto.stock_qty: trading['stock_qty'], TradingDto.price: trading['price'], TradingDto.trading_date: trading['trading_date']})
         session.commit()
         session.close()
@@ -589,8 +589,8 @@ class Trading(Resource):
             return {'message': 'Trading not found'}, 404
 
     @staticmethod
-    def put(id):
-        args = parser.parse_args()
+    def put():
+        args = request.get_json()
         print(f'Trading {args} updated')
         try:
             TradingDao.modify_trading(args)

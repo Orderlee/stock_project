@@ -19,7 +19,6 @@ from com_stock_api.resources.member import MemberDao
 from com_stock_api.resources.board import BoardDao
 from com_stock_api.resources.comment import CommentDao
 from com_stock_api.resources.trading import TradingDao
-from com_stock_api.resources.recommend_stock import RecommendStockDao
 
 
 from flask_cors import CORS
@@ -112,11 +111,6 @@ with app.app_context():
     print(f'Boards Total Count is {count}')
     if count == (0,):
         BoardDao.insert_many()
-
-    count = TradingDao.count()
-    print(f'Tradings Total Count is {count}')
-    if count == (0,):
-        TradingDao.insert_many()
 
 initialize_routes(api)
     

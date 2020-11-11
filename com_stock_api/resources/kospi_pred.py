@@ -58,8 +58,8 @@ from com_stock_api.resources.korea_news import NewsDto
 
 
 # ==============================================================
-# =======================                    =======================
-# =======================    DataFrame   ======================
+# =======================                     =======================
+# =======================    DataFrame        ======================
 # =======================                     =======================
 # ==============================================================
 
@@ -95,10 +95,8 @@ class TotalDF():
         df = df[df['date'].notnull() == True].set_index('date')
         # print(df)
         
-        # korea_tickers ={'lg_innotek':'011070','lg_chem':'051910'}
+
         tic = [t for t in self.tickers if t != self.ticker]
-        #for k_tic,v in korea_tickers.items():
-        #print(tic)
         df2 = pd.read_sql_table('korea_finance',engine.connect())
         df2 = df2.loc[(df2['ticker'] == tic[0]) & (df2['date'] > '2019-12-31') & (df2['date']<'2020-07-01')]
         df2 = df2.rename(columns={'open':tic[0] + '_open', 'close':tic[0] + '_close','high':tic[0]+'_high','low':tic[0]+'_low'})
@@ -171,6 +169,226 @@ class TotalDF():
 #     h = TotalDF()
 #     h.hook()
 
+# ==================================================================
+# =======================                    =======================
+# =======================        analsys     =======================
+# =======================                    =======================
+# ==================================================================
+
+
+class StockService():
+
+  
+    def __init__(self):
+        self.reader = FileReader()
+        self.data = os.path.abspath(__file__+"/.."+"/data/")
+        self.ticker=''
+        self.tickers = ['051910','011070']
+
+    
+    def hook(self):
+        for tic in self.tickers:
+            self.ticker = tic
+            self.get_data()
+
+
+    
+    def get_data(self):
+        path = self.data
+        self.reader.context = os.path.join(path)
+        self.reader.fname = '/'+self.ticker+'_dataset.csv'
+        df = self.reader.csv_to_dframe()
+        print(df)
+        #print(df.columns)
+
+        """
+        date,open,close,high,low,volume,011070_open,011070_close,011070_high,011070_low,ko_cases,ko_deaths,se_cases,se_deaths
+        """
+ 
+        
+
+        num_shape = 120
+        train = df[:num_shape][["open"]]
+        test = df[num_shape:][["close"]]
+
+        
+        
+        #print(type(df['date']))
+        # print(df.columns)
+        # print(df.shape)
+        #train = df[["close"]]
+        print(train.shape)
+        #test = pd.DataFrame(df["close"])
+        print('test:',test.shape)
+
+        sc = MinMaxScaler(feature_range = (0,1))
+        train_scaled = sc.fit_transform(train)
+
+        X_train = []
+        
+        #price on next day
+        y_train = []
+
+        window  = 60
+
+        for i in range(window, num_shape):
+            try:
+                X_train_ = np.reshape(train_scaled[i-window:i,0],(window,1))
+                X_train.append(X_train_)
+                y_train.append(train_scaled[i,0])
+            except:
+                pass
+        
+        X_train = np.stack(X_train)
+        #print(X_train.shape)
+        y_train = np.stack(y_train)
+        #print(y_train.shape)
+
+        
+
+        model = Sequential()
+
+        model.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1],1)))
+        model.add(Dropout(0.2))
+        
+        model.add(LSTM(units = 50, return_sequences = True))
+        model.add(Dropout(0.2))
+
+        model.add(LSTM(units=50, return_sequences = True))
+        model.add(Dropout(0.2))
+
+        model.add(LSTM(units=50))
+        model.add(Dropout(0.2))
+
+        model.add(Dense(units = 1))
+        model.summary()
+
+
+
+        checkpoint_path = os.path.join(path, self.ticker+'_train', self.ticker+'.ckpt')
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
+        
+        model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+        hist = model.fit(X_train, y_train, callbacks=[cp_callback], epochs = 450, batch_size = 32) 
+        model.save(os.path.join(path, self.ticker + '_pred.h5'))
+        model.load_weights(checkpoint_path)
+        model.save_weights(checkpoint_path.format(epoch=0))
+
+        
+
+        #print("loss:"+ str(hist.history['loss']))
+
+        
+        df_volume = np.vstack((train, test))
+        # print(train.shape)
+        # print(test.shape)
+        # print(df_volume.shape)
+        inputs = df_volume[df_volume.shape[0] - test.shape[0] - window:]
+        inputs = inputs.reshape(-1,1)
+        inputs = sc.transform(inputs)
+        num_2 = df_volume.shape[0] - num_shape + window
+        
+        X_test = []
+        
+        for i in range(window, num_2):
+            X_test_ = np.reshape(inputs[i-window:i, 0], (window, 1))
+            X_test.append(X_test_)
+            
+        X_test = np.stack(X_test)
+        #print(X_test.shape)
+
+        predict = model.predict(X_test)
+        predict = sc.inverse_transform(predict)
+        #df=df.sort_values(by=['date'])
+        #print('======================')
+        #print('[ test ] ',test.shape)
+        #print('[ predict ] ',predict.shape)
+        #print(df['date'][:])
+        
+        #print(f'type: {type(predict)}, value: {predict[:]}')
+        #print(f'type: {type(test)}, value: {test[:]}')
+        #print('======================')
+        
+        
+        
+        diff = predict - test.astype(float)
+
+        print("MSE:", np.mean(diff**2))
+        print("MAE:", np.mean(abs(diff)))
+        print("RMSE:", np.sqrt(np.mean(diff**2)))
+
+        # plt.figure(figsize=(20,7))
+        # plt.plot(df['date'].values[:], df_volume[:], color = 'red', label = 'Real lgchem Stock Price')
+        # plt.plot(df['date'][-predict.shape[0]:].values, predict, color = 'blue', label = 'Predicted lgchem Stock Price')
+        # plt.xticks(np.arange(1000,df[:].shape[0],2000))
+        # plt.title('lgchem Stock Price Prediction')
+        # plt.xlabel('Date')
+        # plt.ylabel('Price (₩)')
+        # plt.legend()
+        # plt.show()
+
+        pred_ = predict[-1].copy()
+        #print(f'type:{type(pred_)}, value:{pred_[:]}')
+        prediction_full = []
+        window = 60
+        df_copy = df.iloc[:, 2:3][1:].values
+        #print(f'type:{type(df_copy)}, value:{df_copy[:]}')
+
+        for j in range(20):
+            df_ = np.vstack((df_copy, pred_))
+            train_ = df_[:num_shape]
+            test_ = df_[num_shape:]
+    
+            df_volume_ = np.vstack((train_, test_))
+
+            inputs_ = df_volume_[df_volume_.shape[0] - test_.shape[0] - window:]
+            inputs_ = inputs_.reshape(-1,1)
+            inputs_ = sc.transform(inputs_)
+
+            X_test_2 = []
+
+            for k in range(window, num_2):
+                X_test_3 = np.reshape(inputs_[k-window:k, 0], (window, 1))
+                X_test_2.append(X_test_3)
+
+            X_test_ = np.stack(X_test_2)
+            predict_ = model.predict(X_test_)
+            pred_ = sc.inverse_transform(predict_)
+            prediction_full.append(pred_[-1][0])
+            # print(prediction_full)
+            df_copy = df_[j:]
+
+        prediction_full_new = np.vstack((predict, np.array(prediction_full).reshape(-1,1)))
+
+        df_date = df[['date']]
+        
+        for h in range(30):
+            df_date_add = pd.to_datetime(df_date['date'].iloc[-1]) + pd.DateOffset(days=1)
+            df_date_add = pd.DataFrame([df_date_add.strftime("%Y-%m-%d")], columns=['date'])
+            df_date = df_date.append(df_date_add)
+        
+        df_date = df_date.reset_index(drop=True)
+
+        plt.figure(figsize=(20,7))
+        plt.plot(df['date'].values[:], df_volume[:], color = 'red', label = 'Real ' +self.ticker+' Stock Price')
+        plt.plot(df_date['date'][-prediction_full_new.shape[0]:].values, prediction_full_new, color = 'blue', label = 'Predicted ' +self.ticker +' Stock Price')
+        plt.xticks(np.arange(100,df[:].shape[0],20)) #100, 20
+        plt.title(self.ticker + ' Stock Price Prediction')
+        plt.xlabel('date')
+        plt.ylabel('Price (₩)')
+        plt.legend()
+        
+        image_path = os.path.abspath(__file__+"/.."+"/image/")
+        graph_image = self.ticker + "_graph.png"
+        output_image= os.path.join(image_path,graph_image)
+        plt.savefig(output_image) 
+        #plt.show()
+        
+
+if __name__ =='__main__':
+    s = StockService()
+    s.hook()
+    #StockService.hook()
 
 
 
@@ -256,29 +474,6 @@ class KospiDao(KospiDto):
             session.commit()
         session.close()
     
-    """def insert_many():
-        service = MemberPro()
-        Session = openSession()
-        session = Session()
-        df = service.hook()
-        print(df.head())
-
-        # 저장된 모델로 멤버 이탈 확률 구하기
-        mmdp = MemberModelingDataPreprocessing()
-        refined_members = mmdp.hook_process(df)
-        print(f'REFINED_MEMBERS: \n{refined_members}')
-        refined_members = refined_members.drop('exited', axis=1)
-        refined_members = [np.array(refined_members, dtype=np.float32)]
-        print(f'REFINED_MEMBERS AFTER NUMPY ARRAY: \n{refined_members}')
-
-        path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'models', 'member')
-        new_model = tf.keras.models.load_model(os.path.join(path, 'member_churn.h5'))
-
-        model_pred = new_model.predict(refined_members)
-        print(f'MODEL PREDICTION: {model_pred}')
-
-        df['probability_churn'] = model_pred
-        print(f'LAST DATAFRAME: {df}')"""
     
     @staticmethod
     def count():
@@ -432,250 +627,3 @@ class lginnotek_pred(Resource):
 
 
         
-# ==================================================================
-# =======================                    =======================
-# =======================        analsys     =======================
-# =======================                    =======================
-# ==================================================================
-
-
-class StockService():
-
-    # x_train: object = None
-    # y_train: object = None
-    # x_validation: object = None
-    # y_validation: object = None
-    # x_test: object = None
-    # y_test: object = None
-    # model: object = None
-
-  
-
-    def __init__(self):
-        self.reader = FileReader()
-        self.data = os.path.abspath(__file__+"/.."+"/data/")
-        self.ticker=''
-        self.tickers = ['051910','011070']
-
-    
-    def hook(self):
-        for tic in self.tickers:
-            self.ticker = tic
-        self.get_data()
-        # self.dataprocessing()
-        #self.create_model()
-        #self.train_model()
-        #self.eval_model()
-    
-    def get_data(self):
-        df = pd.read_sql_table('korea_finance', engine.connect())
-        df = df.loc[(df['ticker'] == self.ticker)]
-        #print(df)
-        #df =df.loc[(df['ticker'] == self.ticker) & (df['date']>'2016-10-29') & (df['date'] <'2020-07-01')]
-        # df = data.to_numpy()
-        
-
-        table_col = df.shape[1]
-        print(df.shape[1])
-        y_col = 1
-        x_col = table_col - y_col
-
-        num_shape = 800
-        train = df[:num_shape][["open"]]
-        test = df[num_shape:][["close"]]
-        # x_train, x_test, y_train,y_test =train_test_split(x,y, test_size = 0.4) 
-        # x_test, x_validation, y_test, y_validation =train_test_split(x_test,y_test, test_size=0.4)
-
-        path = self.data
-        # self.reader.context = os.path.join(path)
-        # self.reader.fname = '/lgchem_dataset.csv'
-        # df = self.reader.csv_to_dframe()
-        #df['date'] = pd.to_datetime(df['date'].astype(str), format='%Y-%m-%d') # 'datetime64[D]' 'datetime64[ns]'
-        #print(type(df['date']))
-  
-        
-        # print(df.columns)
-        # num_shape = 90
-        # train = df.iloc[:num_shape, 1:2].values
-        # test = df.iloc[num_shape:, 1:2].values
-        # print(df.shape)
-        #train = df[["close"]]
-        print(train.shape)
-        #test = pd.DataFrame(df["close"])
-        print('test:',test.shape)
-
-        sc = MinMaxScaler(feature_range = (0,1))
-        train_scaled = sc.fit_transform(train)
-
-        X_train = []
-        
-        #price on next day
-        y_train = []
-
-        window  = 60
-
-        for i in range(window, num_shape):
-            try:
-                X_train_ = np.reshape(train_scaled[i-window:i,0],(window,1))
-                X_train.append(X_train_)
-                y_train.append(train_scaled[i,0])
-            except:
-                pass
-        
-        X_train = np.stack(X_train)
-        #print(X_train.shape)
-        y_train = np.stack(y_train)
-        #print(y_train.shape)
-        #print(self.X_train.shape)
-        #print(self.y_train.shape)
-        
-
-        model = Sequential()
-
-        model.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1],1)))
-        model.add(Dropout(0.2))
-        
-        model.add(LSTM(units = 50, return_sequences = True))
-        model.add(Dropout(0.2))
-
-        model.add(LSTM(units=50, return_sequences = True))
-        model.add(Dropout(0.2))
-
-        model.add(LSTM(units=50))
-        model.add(Dropout(0.2))
-
-        model.add(Dense(units = 1))
-        model.summary()
-
-
-
-        checkpoint_path = os.path.join(path, self.ticker + '_train', self.ticker + '.ckpt')
-        cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
-        model.compile(optimizer = 'adam', loss = 'mean_squared_error')
-        hist = model.fit(X_train, y_train, epochs = 1,callbacks=[cp_callback], batch_size = 32)
-        model.save(os.path.join(path, self.ticker + '_pred.h5'))
-
-        #print("loss:"+ str(hist.history['loss']))
-
-        
-        df_volume = np.vstack((train, test))
-        print(train.shape)
-        print(test.shape)
-        print(df_volume.shape)
-        inputs = df_volume[df_volume.shape[0] - test.shape[0] - window:]
-        inputs = inputs.reshape(-1,1)
-        inputs = sc.transform(inputs)
-        num_2 = df_volume.shape[0] - num_shape + window
-        
-        X_test = []
-        
-        for i in range(window, num_2):
-            X_test_ = np.reshape(inputs[i-window:i, 0], (window, 1))
-            X_test.append(X_test_)
-            
-        X_test = np.stack(X_test)
-        print(X_test.shape)
-
-        predict = model.predict(X_test)
-        predict = sc.inverse_transform(predict)
-        #df=df.sort_values(by=['date'])
-        print('======================')
-        print('[ test ] ',test.shape)
-        print('[ predict ] ',predict.shape)
-        #print(df['date'][:])
-        
-        print(f'type: {type(predict)}, value: {predict[:]}')
-        print(f'type: {type(test)}, value: {test[:]}')
-        print('======================')
-        '''
-        [ test ]  (290, 1)
-        [ predict ]  (290, 1)
-        type: <class 'numpy.ndarray'>, value: [1.5268588e+18]
-        type: <class 'numpy.ndarray'>, value: ['2017-12-28T00:00:00.000000000']
-        test 가 날짜이기 때문에 연산이 안되네요...
-        '''
-        
-        
-        diff = predict - test.astype(float)
-
-        print("MSE:", np.mean(diff**2))
-        print("MAE:", np.mean(abs(diff)))
-        print("RMSE:", np.sqrt(np.mean(diff**2)))
-
-        # plt.figure(figsize=(20,7))
-        # plt.plot(df['date'].values[:], df_volume[:], color = 'red', label = 'Real lgchem Stock Price')
-        # plt.plot(df['date'][-predict.shape[0]:].values, predict, color = 'blue', label = 'Predicted lgchem Stock Price')
-        # plt.xticks(np.arange(1000,df[:].shape[0],2000))
-        # plt.title('lgchem Stock Price Prediction')
-        # plt.xlabel('Date')
-        # plt.ylabel('Price (₩)')
-        # plt.legend()
-        # plt.show()
-
-        pred_ = predict[-1].copy()
-        #print(f'type:{type(pred_)}, value:{pred_[:]}')
-        prediction_full = []
-        window = 60
-        df_copy = df.iloc[:, 2:3][1:].values
-        #print(f'type:{type(df_copy)}, value:{df_copy[:]}')
-
-        for j in range(20):
-            df_ = np.vstack((df_copy, pred_))
-            train_ = df_[:num_shape]
-            test_ = df_[num_shape:]
-    
-            df_volume_ = np.vstack((train_, test_))
-
-            inputs_ = df_volume_[df_volume_.shape[0] - test_.shape[0] - window:]
-            inputs_ = inputs_.reshape(-1,1)
-            inputs_ = sc.transform(inputs_)
-
-            X_test_2 = []
-
-            for k in range(window, num_2):
-                X_test_3 = np.reshape(inputs_[k-window:k, 0], (window, 1))
-                X_test_2.append(X_test_3)
-
-            X_test_ = np.stack(X_test_2)
-            predict_ = model.predict(X_test_)
-            pred_ = sc.inverse_transform(predict_)
-            prediction_full.append(pred_[-1][0])
-            df_copy = df_[j:]
-
-        prediction_full_new = np.vstack((predict, np.array(prediction_full).reshape(-1,1)))
-
-        df_date = df[['date']]
-        
-        for h in range(30):
-            df_date_add = pd.to_datetime(df_date['date'].iloc[-1]) + pd.DateOffset(days=1)
-            df_date_add = pd.DataFrame([df_date_add.strftime("%Y-%m-%d")], columns=['date'])
-            df_date = df_date.append(df_date_add)
-        
-        df_date = df_date.reset_index(drop=True)
-
-        d =df['date'].values[:]
-        d.reshape(-1,990)
-        print(d.shape)
-        print(d)
-        # print(type(df['date'].values[:]))
-        # c =df_volume
-        # print(c.shape)
-        # print(df_volume)
-        # print(type(df_volume))
-
-        # plt.figure(figsize=(20,7))
-        # plt.plot(d, df_volume[:], color = 'red', label = 'Real lgchem Stock Price')
-        # plt.plot(df_date['date'][-prediction_full_new.shape[0]:].values, prediction_full_new, color = 'blue', label = 'Predicted lgchem Stock Price')
-        # plt.xticks(np.arange(1000,df[:].shape[0],1500))
-        # plt.title('lgchem Stock Price Prediction')
-        # plt.xlabel('date')
-        # plt.ylabel('Price (₩)')
-        # plt.legend() 
-        # plt.show()
-
-        
-
-if __name__ =='__main__':
-    s = StockService()
-    s.hook()
-    #StockService.hook()

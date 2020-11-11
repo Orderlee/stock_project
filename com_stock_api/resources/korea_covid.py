@@ -12,6 +12,21 @@ import json
 import numpy as np
 from sqlalchemy import and_,or_,func
 
+"""
+ * @ Module Name : korea_covid.py
+ * @ Description : covid
+ * @ since 2020.10.15
+ * @ version 1.0
+ * @ Modification Information
+ * @ author 이영우
+ * @ special reference libraries
+ *     sqlalchemy, flask_restful
+ * @ 수정일         수정자                      수정내용
+ *   ------------------------------------------------------------------------
+ *   2020.11.10     이영우      
+ *   2020.11.10     이영우      
+ *   2020.11.02     이영우      
+"""
 
 # ==============================================================
 # =======================                =======================

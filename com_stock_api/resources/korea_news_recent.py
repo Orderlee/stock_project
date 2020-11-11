@@ -19,6 +19,21 @@ from sqlalchemy.dialects.mysql import DATE
 import time
 import random
 
+"""
+ * @ Module Name : korea_news_recent.py
+ * @ Description : recent news
+ * @ since 2020.10.15
+ * @ version 1.0
+ * @ Modification Information
+ * @ author 이영우
+ * @ special reference libraries
+ *     sqlalchemy, flask_restful
+ * @ 수정일         수정자                      수정내용
+ *   ------------------------------------------------------------------------
+ *   2020.11.10     이영우      
+ *   2020.11.10     이영우      
+ *   2020.11.02     이영우      
+"""
 
 # ==============================================================
 # =========================                =====================
@@ -174,19 +189,33 @@ class RNewsDao(NewsDto):
 
     def bulk(self):
         path = self.data
-        #kn = KoreaNews()
-        #kn.new_model()
         companys = ['lg화학','lg이노텍']
+        #1. 최근 데이터 크롤링 후 커밋
+        # kn = KoreaNews()
+        # kn.new_model()
+        
+        # for com in companys:
+        #     print(f'company:{com}')
+        #     df = kn.search_news(com)
+        #     if com =='lg화학':
+        #         com ='lgchem'
+        #     elif com =='lg이노텍':
+        #         com='lginnotek'
+        #     df.to_csv(path + '/'+com+'_recent_news.csv',encoding='UTF-8')
+        #     print(df.head()) 
+        #     session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
+        #     session.commit()
+        # session.close()
+
+        #2. 저장된 데이터 커밋
         for com in companys:
             print(f'company:{com}')
-            #df = kn.search_news(com)
             if com =='lg화학':
                 com ='lgchem'
             elif com =='lg이노텍':
                 com='lginnotek'
             file_name = com +'_recent_news.csv'
             input_file = os.path.join(path,file_name)
-            #df.to_csv(path + '/'+com+'_recent_news.csv',encoding='UTF-8')
             df = pd.read_csv(input_file ,encoding='utf-8',dtype=str)
             print(df.head()) 
             session.bulk_insert_mappings(NewsDto, df.to_dict(orient='records'))
