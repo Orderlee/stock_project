@@ -26,12 +26,9 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from keras.callbacks import EarlyStopping
 from keras.optimizers import Adam, SGD
-
+from sklearn.metrics import accuracy_score
 from keras.layers import Dense, LSTM, Dropout, GRU
 from keras.layers import *
-
-
-
 
 
 from com_stock_api.resources.korea_covid import KoreaDto, KoreaCovids, KOCases, SEcases
@@ -268,11 +265,12 @@ class StockService():
         checkpoint_path = os.path.join(path, self.ticker+'_train', self.ticker+'.ckpt')
         cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
         
-        model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+        model.compile(optimizer = 'adam', loss = 'mean_squared_error',metrics = ['accuracy'])
         hist = model.fit(X_train, y_train, callbacks=[cp_callback], epochs = 450, batch_size = 32) 
         model.save(os.path.join(path, self.ticker + '_pred.h5'))
         model.load_weights(checkpoint_path)
         model.save_weights(checkpoint_path.format(epoch=0))
+        
 
         
 
@@ -312,6 +310,10 @@ class StockService():
         
         
         diff = predict - test.astype(float)
+        
+        # y_pred = predict
+        # y_test_ = np.argmax(test, axis = 1)
+        # print(accuracy_score(y_pred, y_test_))
 
         print("MSE:", np.mean(diff**2))
         print("MAE:", np.mean(abs(diff)))
@@ -377,6 +379,7 @@ class StockService():
         plt.xlabel('date')
         plt.ylabel('Price (₩)')
         plt.legend()
+        
         
         image_path = os.path.abspath(__file__+"/.."+"/image/")
         graph_image = self.ticker + "_graph.png"

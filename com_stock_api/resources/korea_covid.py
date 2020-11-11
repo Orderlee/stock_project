@@ -87,9 +87,9 @@ class KoreaDto(db.Model):
     def __init__(self, id,date, seoul_cases, seoul_deaths, total_cases, total_deaths):
         self.date = date
         self.seoul_cases = seoul_cases
-        self.seoul_death = seoul_death
+        self.seoul_death = seoul_deaths
         self.total_cases = total_cases
-        self.total_death = total_death
+        self.total_death = total_deaths
     
     def __repr__(self):
         return f'id={self.id},date={self.date}, seoul_cases={self.seoul_cases},\
