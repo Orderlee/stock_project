@@ -92,7 +92,14 @@ class KoreaNews():
                     htmls = BeautifulSoup(articles_code,"lxml")
                     #docs = htmls.find("table",{"class":"view"})
                     docs = htmls.find("div",{"class":"scr01"})
-                    docs = docs.text.replace('/','').replace('?','').replace("\t",'').replace("\n",'').replace('/n','').replace('[','').replace(']','').replace('!','').replace('-','').replace('$','').replace('▲','').replace("'",'').replace('■','').replace('◆','').replace('#','').replace('_','').replace('=','').replace('"','').replace(" \'",'').replace('아웃링크','').replace('◀','').replace('▶','').replace('<','').replace('>','').replace(':','').replace(',','').replace('ⓒ','').replace('※','').replace('\xa0','').replace('&','').replace('△','').replace('이데일리','').replace('매일경제','').replace('파이낸셜뉴스','').replace('서울경제','').replace('한국경제','').replace('조선비즈','').replace('아시아경제','').replace('머니투데이','').replace('헤럴드경제','').replace('···','').replace('·','').replace('‘','').replace('’','').replace('..','').replace("“",'').replace("”",'').replace('`','').replace('…','').replace('Copyrights','').replace('━','').replace('@','').lstrip()
+                    docs = docs.text.replace('/','').replace('?','').replace("\t",'').replace("\n",'').replace('/n','').\
+                        replace('[','').replace(']','').replace('!','').replace('-','').replace('$','').replace('▲','').replace("'",'').\
+                            replace('■','').replace('◆','').replace('#','').replace('_','').replace('=','').replace('"','').replace(" \'",'').\
+                            replace('아웃링크','').replace('◀','').replace('▶','').replace('<','').replace('>','').replace(':','').replace(',','').\
+                                replace('ⓒ','').replace('※','').replace('\xa0','').replace('&','').replace('△','').replace('이데일리','').replace('매일경제','').\
+                                    replace('파이낸셜뉴스','').replace('서울경제','').replace('한국경제','').replace('조선비즈','').replace('아시아경제','').\
+                                        replace('머니투데이','').replace('헤럴드경제','').replace('···','').replace('·','').replace('‘','').replace('’','').\
+                                            replace('..','').replace("“",'').replace("”",'').replace('`','').replace('…','').replace('Copyrights','').replace('━','').replace('@','').lstrip()
                     article_result.append(docs)
                 #print(article_result)
 
@@ -112,8 +119,6 @@ class KoreaNews():
             result= {"date" : date_result, "headline" : title_result, "content" : article_result, "url" : link_result,"ticker":plusUrl.zfill(6)} 
             df_result = pd.DataFrame(result)
             #time.sleep( random.uniform(2,4) )
-
-
 
             #df_result['date']=pd.to_datetime(df_result['date'].astype(str), format='%Y/%m/%d')
             #df_result.set_index('date', inplace=True)

@@ -12,10 +12,9 @@ import numpy as np
 import json
 import seaborn as sns
 import matplotlib.pyplot as plt
-from pandas._libs.tslibs.offsets import BDay
 
 from datetime import datetime
-
+from tensorflow import keras
 import tensorflow as tf
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
@@ -29,6 +28,7 @@ from keras.optimizers import Adam, SGD
 from sklearn.metrics import accuracy_score
 from keras.layers import Dense, LSTM, Dropout, GRU
 from keras.layers import *
+tf.compat.v1.disable_eager_execution()
 
 
 from com_stock_api.resources.korea_covid import KoreaDto, KoreaCovids, KOCases, SEcases
@@ -201,15 +201,11 @@ class StockService():
         """
         date,open,close,high,low,volume,011070_open,011070_close,011070_high,011070_low,ko_cases,ko_deaths,se_cases,se_deaths
         """
- 
-        
 
         num_shape = 120
         train = df[:num_shape][["open"]]
         test = df[num_shape:][["close"]]
-
-        
-        
+       
         #print(type(df['date']))
         # print(df.columns)
         # print(df.shape)
@@ -243,7 +239,7 @@ class StockService():
 
         
 
-        model = Sequential()
+        model = tf.keras.models.Sequential()
 
         model.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1],1)))
         model.add(Dropout(0.2))
@@ -251,7 +247,7 @@ class StockService():
         model.add(LSTM(units = 50, return_sequences = True))
         model.add(Dropout(0.2))
 
-        model.add(LSTM(units=50, return_sequences = True))
+        model.add(LSTM(units=50,return_sequences = True))
         model.add(Dropout(0.2))
 
         model.add(LSTM(units=50))
@@ -263,13 +259,14 @@ class StockService():
 
 
         checkpoint_path = os.path.join(path, self.ticker+'_train', self.ticker+'.ckpt')
-        cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1)
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path, save_weights_only=True, verbose=1, period=5)
         
         model.compile(optimizer = 'adam', loss = 'mean_squared_error',metrics = ['accuracy'])
+        #model.load_weights(checkpoint_path)
+        model.save_weights(checkpoint_path.format(epoch=0))
         hist = model.fit(X_train, y_train, callbacks=[cp_callback], epochs = 450, batch_size = 32) 
         model.save(os.path.join(path, self.ticker + '_pred.h5'))
-        model.load_weights(checkpoint_path)
-        model.save_weights(checkpoint_path.format(epoch=0))
+        
         
 
         
@@ -453,6 +450,10 @@ class KospiVo:
     covid_id : str = 0
     stock_id : str = 0
     news_id : str =  0
+    open: float = 0.0
+    close: float = 0.0
+    high: float = 0.0
+    low : float = 0.0
 
 
 Session = openSession()
@@ -604,6 +605,16 @@ class lgchem_pred(Resource):
 
     @staticmethod
     def post():
+        parser.add_argument('open', type=str, required=True,
+        help='This field should be a number')
+        parser.add_argument('high', type=str, required=True,
+        help='This field should be a number')
+        parser.add_argument('low', type=str, required=True,
+        help='This field should be a number')
+        parser.add_argument('close', type=str, required=True,
+        help='This field should be a number')
+
+
         args = parser.parse_args()
         stock = KospiVo()
         stock.ticker = args.ticker
@@ -629,4 +640,52 @@ class lginnotek_pred(Resource):
 
 
 
-        
+class LGchempred(Resource):
+    open : float = 0.0
+    high : float = 0.0
+    low : float = 0.0
+    close : float = 0.0
+
+    def __init__(self):
+        self.path = os.path.abspath(__file__+"/.."+"/data"+"/011070_train")
+
+
+    def assign(self, param):
+        self.open = param.open
+        self.high = param.high
+        self.low= param.low
+        self.close = param.close
+        self.ticker = param.ticker
+
+
+
+    def predict(self):
+        print('##########  Service ############')
+
+        X = tf.compat.v1.placeholder(tf.float32, shape=[None, 4])
+        W = tf.Variable(tf.random.normal([4,1]), name='weight')
+        b = tf.Variable(tf.random.normal([1]), name='bias')
+
+        saver =  tf.compat.v1.train.Saver()
+        with tf.compat.v1.Session() as sess:
+            sess.run(tf.compat.v1.global_variables_initializer())
+            saver.restore(sess, self.path+'/011070.ckpt')
+            data = [[self.open, self.high, self.low], ]                
+            arr = np.array(data, dtype=np.float32)
+            dict = sess.run(tf.matmul(X,W)+b, feed_dict={X:arr[0,3]})
+            print ('dict!!' , dict[0])
+            print(dict[0])
+        return int(dict[0])
+            
+
+
+# if __name__ == '__main__':
+#     service = LGchempred()
+#     chem = KospiVo()
+#     chem.open ='500000'
+#     chem.high= '550000'
+#     chem.low = '490000'
+#     chem.ticker = '051910'
+#     service.assign(chem)
+#     price = service.predict()
+#     print('price:',price)
