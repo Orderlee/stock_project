@@ -264,6 +264,7 @@ class StockService():
         model.compile(optimizer = 'adam', loss = 'mean_squared_error',metrics = ['accuracy'])
         #model.load_weights(checkpoint_path)
         model.save_weights(checkpoint_path.format(epoch=0))
+        #tf.keras.Model.save_weights(path)
         hist = model.fit(X_train, y_train, callbacks=[cp_callback], epochs = 450, batch_size = 32) 
         model.save(os.path.join(path, self.ticker + '_pred.h5'))
         
@@ -385,10 +386,10 @@ class StockService():
         #plt.show()
         
 
-if __name__ =='__main__':
-    s = StockService()
-    s.hook()
-    #StockService.hook()
+# if __name__ =='__main__':
+#     s = StockService()
+#     s.hook()
+#     #StockService.hook()
 
 
 
@@ -411,13 +412,18 @@ class KospiDto(db.Model):
     date : str = db.Column(db.DATE)
     ticker : str = db.Column(db.VARCHAR(30))
     pred_price : int = db.Column(db.VARCHAR(30))
+    open: float = db.Column(db.Float)
+    high: float = db.Column(db.Float)
+    low: float = db.Column(db.Float)
+    close: float = db.Column(db.Float)
+
 
     covid_id: str = db.Column(db.Integer, db.ForeignKey(KoreaDto.id))
     stock_id: str = db.Column(db.Integer, db.ForeignKey(StockDto.id))
     news_id: str = db.Column(db.Integer, db.ForeignKey(NewsDto.id))
 
 
-    def __init__(self,id,date, covid_id,stock_id,news_id,ticker, pred_price):
+    def __init__(self,id,date, covid_id,stock_id,news_id,ticker, pred_price,open,high,low,close):
         self.id = id
         self.date = date
         self.covid_id = covid_id
@@ -425,10 +431,14 @@ class KospiDto(db.Model):
         self.news_id= news_id
         self.ticker= ticker
         self.pred_price = pred_price
+        self.open = open
+        self.high = high
+        self.low = low
+        self.cloese = close
     
     def __repr__(self):
         return f'id={self.id},date={self.date},covid_id ={self.covid_id },stock_id={self.stock_id},news_id={self.news_id}, ticker={self.ticker},\
-            pred_price={self.pred_price}'
+            pred_price={self.pred_price},open={self.open},high={self.high},low={self.low},close={self.close}'
             
     @property
     def json(self):
@@ -439,7 +449,11 @@ class KospiDto(db.Model):
             'stock_id': self.stock_id,
             'news_id': self.news_id,
             'ticker' : self.ticker,
-            'pred_price' : self.pred_price
+            'pred_price' : self.pred_price,
+            'open': self.open,
+            'low': self.low,
+            'high': self.high,
+            'close': self.close
         }
 
 class KospiVo:
@@ -562,6 +576,11 @@ parser.add_argument('stock_id', type=int, required=True, help='This field cannot
 parser.add_argument('news_id', type=int, required=True, help='This field cannot be left blank')
 parser.add_argument('ticker', type=str, required=True, help='This field cannot be left blank')
 parser.add_argument('pred_price', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('open', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('close', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('high', type=int, required=True, help='This field cannot be left blank')
+parser.add_argument('low', type=int, required=True, help='This field cannot be left blank')
+
 
 class Kospi(Resource):
 
@@ -659,18 +678,22 @@ class LGchempred(Resource):
 
 
 
-    def predict(self):
+    def predict(self,open,high,low):
         print('##########  Service ############')
 
-        X = tf.compat.v1.placeholder(tf.float32, shape=[None, 4])
-        W = tf.Variable(tf.random.normal([4,1]), name='weight')
+        X = tf.compat.v1.placeholder(tf.float32, shape=[None, 3])
+        W = tf.Variable(tf.random.normal([3,1]), name='weight')
         b = tf.Variable(tf.random.normal([1]), name='bias')
-
+        hypothesis = tf.matmul(X,W)+b
         saver =  tf.compat.v1.train.Saver()
+        #model = tf.global_variables_initializer()
+        open = float(open)
+        high = float(high)
+        low = float(low)
         with tf.compat.v1.Session() as sess:
             sess.run(tf.compat.v1.global_variables_initializer())
             saver.restore(sess, self.path+'/011070.ckpt')
-            data = [[self.open, self.high, self.low], ]                
+            data = ((open,high,low),)               
             arr = np.array(data, dtype=np.float32)
             dict = sess.run(tf.matmul(X,W)+b, feed_dict={X:arr[0,3]})
             print ('dict!!' , dict[0])
@@ -679,13 +702,13 @@ class LGchempred(Resource):
             
 
 
-# if __name__ == '__main__':
-#     service = LGchempred()
-#     chem = KospiVo()
-#     chem.open ='500000'
-#     chem.high= '550000'
-#     chem.low = '490000'
-#     chem.ticker = '051910'
-#     service.assign(chem)
-#     price = service.predict()
-#     print('price:',price)
+if __name__ == '__main__':
+    service = LGchempred()
+    chem = KospiVo()
+    chem.open ='500000'
+    chem.high= '550000'
+    chem.low = '490000'
+    chem.ticker = '051910'
+    service.assign(chem)
+    price = service.predict(chem.open,chem.high,chem.low)
+    print('price:',price)
